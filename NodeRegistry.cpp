@@ -63,3 +63,7 @@ bool NodeRegistry::disconnectNodes(const std::string &id1, const std::string &co
     res &= node2->disconnect(connName, id1, true);
     return res;
 }
+
+std::vector<std::string> NodeRegistry::getAllIds() const {
+    return m_cluster->getAllIds();
+}

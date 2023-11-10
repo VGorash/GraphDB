@@ -6,6 +6,7 @@
 #define DB_NODEREGISTRY_H
 
 #include <string>
+#include <vector>
 
 class NodeCluster;
 class Node;
@@ -21,6 +22,8 @@ public:
 
     bool connectNodes(const std::string &id1, const std::string &connName, const std::string &id2) const;
     bool disconnectNodes(const std::string &id1, const std::string &connName, const std::string &id2) const;
+
+    std::vector<std::string> getAllIds() const;
 
     NodeRegistry(const NodeRegistry&) = delete;
     void operator=(const NodeRegistry&) = delete;

@@ -7,6 +7,7 @@
 
 #include <unordered_map>
 #include <string>
+#include <vector>
 
 class Node;
 
@@ -22,6 +23,8 @@ private:
     Node* getNode(const std::string& id);
     Node* addNode(const std::string& id);
     bool deleteNode(const std::string& id);
+
+    std::vector<std::string> getAllIds() const;
 
     std::pair<size_t, size_t> getHashRange();
 

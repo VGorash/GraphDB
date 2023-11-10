@@ -53,3 +53,12 @@ bool NodeCluster::deleteNode(const std::string &id) {
 std::pair<size_t, size_t> NodeCluster::getHashRange() {
     return m_hashRange;
 }
+
+std::vector<std::string> NodeCluster::getAllIds() const {
+    std::vector<std::string> result;
+    result.reserve(m_nodes.size());
+    for(const auto& n : m_nodes){
+        result.push_back(n.first);
+    }
+    return result;
+}
