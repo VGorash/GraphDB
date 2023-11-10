@@ -33,7 +33,7 @@ Node *NodeCluster::addNode(const std::string &id) {
     if(m_hasher(id) < m_hashRange.first || m_hasher(id) > m_hashRange.second){
         return nullptr;
     }
-    Node* node = new Node(id, this);
+    Node* node = new Node(id);
     m_nodes.insert({id, node});
     return node;
 }
@@ -48,6 +48,7 @@ bool NodeCluster::deleteNode(const std::string &id) {
     }
     return false;
 }
+
 
 std::pair<size_t, size_t> NodeCluster::getHashRange() {
     return m_hashRange;

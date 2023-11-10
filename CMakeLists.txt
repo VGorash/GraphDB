@@ -8,6 +8,5 @@ add_executable(DB
         Node.cpp
         NodeCluster.cpp
         NodeRegistry.cpp
-        DB.cpp
         utils.cpp
 )

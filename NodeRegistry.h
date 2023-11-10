@@ -11,12 +11,16 @@ class NodeCluster;
 class Node;
 
 class NodeRegistry {
+
 public:
     static NodeRegistry &getInstance();
 
     Node* getNode(const std::string& id) const;
     Node* addNode(const std::string& id) const;
     bool deleteNode(const std::string& id) const;
+
+    bool connectNodes(const std::string &id1, const std::string &connName, const std::string &id2) const;
+    bool disconnectNodes(const std::string &id1, const std::string &connName, const std::string &id2) const;
 
     NodeRegistry(const NodeRegistry&) = delete;
     void operator=(const NodeRegistry&) = delete;

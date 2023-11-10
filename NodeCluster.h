@@ -15,16 +15,16 @@ class NodeCluster {
     friend class NodeRegistry;
 
 public:
+    NodeCluster(const NodeCluster&) = delete;
+    void operator=(const NodeCluster&) = delete;
+
+private:
     Node* getNode(const std::string& id);
     Node* addNode(const std::string& id);
     bool deleteNode(const std::string& id);
 
     std::pair<size_t, size_t> getHashRange();
 
-    NodeCluster(const NodeCluster&) = delete;
-    void operator=(const NodeCluster&) = delete;
-
-private:
     explicit NodeCluster(std::pair<size_t, size_t> hashRange);
     ~NodeCluster();
 
