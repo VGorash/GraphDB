@@ -24,9 +24,14 @@ private:
     Node* addNode(const std::string& id);
     bool deleteNode(const std::string& id);
 
+    bool addConnection(const std::string& id1, const std::string& connName, const std::string& id2, bool reverse=false);
+    bool removeConnection(const std::string& id1, const std::string& connName, const std::string& id2, bool reverse=false);
+
     std::vector<std::string> getAllIds() const;
 
-    std::pair<size_t, size_t> getHashRange();
+    bool dump() const;
+    bool load();
+    std::pair<size_t, size_t> getHashRange() const;
 
     explicit NodeCluster(std::pair<size_t, size_t> hashRange);
     ~NodeCluster();

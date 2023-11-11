@@ -45,14 +45,14 @@ bool checkFourArgs(const std::vector<std::string> &args, bool query=false){
 }
 
 void printNode(const Node* node){
-    std::cout << "\tNode: " << node->getId() << "\n";
-    std::cout << "\tOutput connections: " << "\n";
+    std::cout << "Node: " << node->getId() << "\n";
+    std::cout << "Output connections: " << "\n";
     for(const auto& c : node->getOutputConnections()){
-        std::cout << "\t\t --> (" << c.first << ") --> " << c.second << "\n";
+        std::cout << "\t --> (" << c.first << ") --> " << c.second << "\n";
     }
-    std::cout << "\tInput connections: " << "\n";
+    std::cout << "Input connections: " << "\n";
     for(const auto& c : node->getInputConnections()){
-        std::cout << "\t\t <-- (" << c.first << ") <-- " << c.second << "\n";
+        std::cout << "\t <-- (" << c.first << ") <-- " << c.second << "\n";
     }
 }
 
@@ -166,7 +166,7 @@ void query(const std::vector<std::string> &args){
     }
     // ? ? id2 or ? conn id2 (3/8, 4/8)
     if(args[1] == "?" && args[3] != "?"){
-        Node* node2 = NodeRegistry::getInstance().getNode(args[3]);
+        const Node* node2 = NodeRegistry::getInstance().getNode(args[3]);
         if(!node2){
             std::cout << "Node with id " << args[3] << " not found in database\n";
             return;
@@ -182,7 +182,7 @@ void query(const std::vector<std::string> &args){
     }
     // id1 ? ? or id1 conn ? (5/8, 6/8)
     if(args[1] != "?" && args[3] == "?"){
-        Node* node1 = NodeRegistry::getInstance().getNode(args[1]);
+        const Node* node1 = NodeRegistry::getInstance().getNode(args[1]);
         if(!node1){
             std::cout << "Node with id " << args[1] << " not found in database\n";
             return;
@@ -198,8 +198,8 @@ void query(const std::vector<std::string> &args){
     }
     // id1 ? id2 or id1 conn id2 (7/8, 8/8)
     if(args[1] != "?" && args[3] != "?"){
-        Node* node1 = NodeRegistry::getInstance().getNode(args[1]);
-        Node* node2 = NodeRegistry::getInstance().getNode(args[3]);
+        const Node* node1 = NodeRegistry::getInstance().getNode(args[1]);
+        const Node* node2 = NodeRegistry::getInstance().getNode(args[3]);
         if(!node1){
             std::cout << "Node with id " << args[1] << " not found in database\n";
             return;

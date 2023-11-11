@@ -16,8 +16,8 @@ class NodeRegistry {
 public:
     static NodeRegistry &getInstance();
 
-    Node* getNode(const std::string& id) const;
-    Node* addNode(const std::string& id) const;
+    const Node* getNode(const std::string& id) const;
+    const Node* addNode(const std::string& id) const;
     bool deleteNode(const std::string& id) const;
 
     bool connectNodes(const std::string &id1, const std::string &connName, const std::string &id2) const;

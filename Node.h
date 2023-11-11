@@ -12,12 +12,13 @@
 class Node {
 
     friend class NodeCluster;
-    friend class NodeRegistry;
 
 public:
     const std::string &getId() const;
     const std::set<std::pair<std::string, std::string>> &getOutputConnections() const;
     const std::set<std::pair<std::string, std::string>> &getInputConnections() const;
+
+    const std::string toString() const;
 
     Node(const Node&) = delete;
     void operator=(const Node&) = delete;
@@ -25,6 +26,8 @@ public:
 private:
     bool connect(const std::string &connName, const std::string &id, bool reverse = false);
     bool disconnect(const std::string &connName, const std::string &id, bool reverse = false);
+
+    bool fillFromString(const std::string &inputString);
 
     explicit Node(std::string id);
     ~Node() = default;

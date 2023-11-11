@@ -6,9 +6,14 @@
 #include "Node.h"
 
 #include <string>
+#include <iostream>
+#include <fstream>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 NodeCluster::NodeCluster(std::pair<size_t, size_t> hashRange) : m_hashRange(hashRange) {
-
+    load();
 }
 
 NodeCluster::~NodeCluster() {
@@ -49,9 +54,20 @@ bool NodeCluster::deleteNode(const std::string &id) {
     return false;
 }
 
+bool NodeCluster::addConnection(const std::string &id1, const std::string &connName, const std::string &id2, bool reverse) {
+    Node *node = getNode(id1);
+    if(!node){
+        return false;
+    }
+    return node->connect(connName, id2, reverse);
+}
 
-std::pair<size_t, size_t> NodeCluster::getHashRange() {
-    return m_hashRange;
+bool NodeCluster::removeConnection(const std::string &id1, const std::string &connName, const std::string &id2, bool reverse) {
+    Node *node = getNode(id1);
+    if(!node){
+        return false;
+    }
+    return node->disconnect(connName, id2, reverse);
 }
 
 std::vector<std::string> NodeCluster::getAllIds() const {
@@ -61,4 +77,52 @@ std::vector<std::string> NodeCluster::getAllIds() const {
         result.push_back(n.first);
     }
     return result;
+}
+
+std::pair<size_t, size_t> NodeCluster::getHashRange() const{
+    return m_hashRange;
+}
+
+bool NodeCluster::dump() const {
+    fs::path data_dir("data");
+    if(!fs::exists(data_dir)){
+        fs::create_directories(data_dir);
+    }
+    fs::path filepath = data_dir / (std::to_string(m_hashRange.first) + "-" + std::to_string(m_hashRange.second) + ".txt");
+    std::ofstream outFile(filepath);
+    if(!outFile.is_open()){
+        return false;
+    }
+    outFile << m_nodes.size() << "\n";
+    for(auto n : m_nodes){
+        outFile << n.second->toString() << "\n";
+    }
+    if(outFile.fail()){
+        return false;
+    }
+    return true;
+}
+
+bool NodeCluster::load() {
+    fs::path data_dir("data");
+    if(!fs::exists(data_dir)){
+        fs::create_directories(data_dir);
+    }
+    fs::path filepath = data_dir / (std::to_string(m_hashRange.first) + "-" + std::to_string(m_hashRange.second) + ".txt");
+    if(!fs::exists(filepath)){
+        return false;
+    }
+    m_nodes.clear();
+    std::ifstream inFile(filepath);
+    int numNodes;
+    std::string nodeString;
+    inFile >> numNodes;
+    std::getline(inFile, nodeString);
+    for(int i=0; i<numNodes; i++){
+        std::getline(inFile, nodeString);
+        Node *node = new Node("");
+        node->fillFromString(nodeString);
+        m_nodes.insert({node->getId(), node});
+    }
+    return true;
 }
