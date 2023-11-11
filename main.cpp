@@ -1,5 +1,5 @@
-#include "NodeRegistry.h"
-#include "Node.h"
+#include "VertexRegistry.h"
+#include "Vertex.h"
 #include "utils.h"
 #include <regex>
 
@@ -44,72 +44,72 @@ bool checkFourArgs(const std::vector<std::string> &args, bool query=false){
     return true;
 }
 
-void printNode(const Node* node){
-    std::cout << "Node: " << node->getId() << "\n";
+void printVertex(const Vertex* vertex){
+    std::cout << "ID: " << vertex->getId() << "\n";
     std::cout << "Output connections: " << "\n";
-    for(const auto& c : node->getOutputConnections()){
-        std::cout << "\t --> (" << c.first << ") --> " << c.second << "\n";
+    for(const auto& c : vertex->getOutputConnections()){
+        std::cout << "\t --(" << c.first << ")--> " << c.second << "\n";
     }
     std::cout << "Input connections: " << "\n";
-    for(const auto& c : node->getInputConnections()){
-        std::cout << "\t <-- (" << c.first << ") <-- " << c.second << "\n";
+    for(const auto& c : vertex->getInputConnections()){
+        std::cout << "\t <--(" << c.first << ")-- " << c.second << "\n";
     }
 }
 
 void printConnection(const std::string &id1, const std::string &connName, const std::string &id2){
-    std::cout << id1 << " --> " << connName << " --> " <<id2;
+    std::cout << id1 << " --(" << connName << ")--> " <<id2;
 }
 
-void addNode(const std::vector<std::string> &args){
+void addVertex(const std::vector<std::string> &args){
     if(!checkTwoArgs(args)){
         return;
     }
-    const Node* node = NodeRegistry::getInstance().addNode(args[1]);
-    if(!node){
-        std::cout << "Node with id " << args[1] << " already exists in database\n";
+    const Vertex* vertex = VertexRegistry::getInstance().addVertex(args[1]);
+    if(!vertex){
+        std::cout << "Vertex with id " << args[1] << " already exists in database\n";
         return;
     }
-    std::cout << "Node added\n";
+    std::cout << "Vertex added\n";
 }
 
-void readNode(const std::vector<std::string> &args){
+void readVertex(const std::vector<std::string> &args){
     if(!checkTwoArgs(args)){
         return;
     }
-    const Node* node = NodeRegistry::getInstance().getNode(args[1]);
-    if(!node){
-        std::cout << "Node with id " << args[1] << " not found in database\n";
+    const Vertex* vertex = VertexRegistry::getInstance().getVertex(args[1]);
+    if(!vertex){
+        std::cout << "Vertex with id " << args[1] << " not found in database\n";
         return;
     }
-    printNode(node);
+    printVertex(vertex);
 }
 
-void deleteNode(const std::vector<std::string> &args){
+void deleteVertex(const std::vector<std::string> &args){
     if(!checkTwoArgs(args)){
         return;
     }
-    if(!NodeRegistry::getInstance().deleteNode(args[1])){
-        std::cout << "Node with id " << args[1] << " not found in database\n";
+    if(!VertexRegistry::getInstance().deleteVertex(args[1])){
+        std::cout << "Vertex with id " << args[1] << " not found in database\n";
         return;
     }
-    std::cout << "Node successfully deleted\n";
+    std::cout << "Vertex successfully deleted\n";
 }
 
-void connectNodes(const std::vector<std::string> &args){
+void connectVertexs(const std::vector<std::string> &args){
     if(!checkFourArgs(args)){
         return;
     }
-    const Node* node1 = NodeRegistry::getInstance().getNode(args[1]);
-    const Node* node2 = NodeRegistry::getInstance().getNode(args[3]);
-    if(!node1){
-        std::cout << "Node with id " << args[1] << " not found in database\n";
+    const Vertex* vertex1 = VertexRegistry::getInstance().getVertex(args[1]);
+    const Vertex* vertex2 = VertexRegistry::getInstance().getVertex(args[3]);
+    if(!vertex1){
+        std::cout << "Vertex with id " << args[1] << " not found in database\n";
         return;
     }
-    if(!node2){
-        std::cout << "Node with id " << args[3] << " not found in database\n";
+    if(!vertex2){
+        std::cout << "Vertex with id " << args[3] << " not found in database\n";
         return;
     }
-    if(!NodeRegistry::getInstance().connectNodes(args[1], args[2], args[3])){
+    if(!VertexRegistry::getInstance().connectVertices(args[1], args[2], args[3])){
         std::cout << "Connection ";
         printConnection(args[1], args[2], args[3]);
         std::cout << " already exists in database\n";
@@ -120,21 +120,21 @@ void connectNodes(const std::vector<std::string> &args){
     std::cout << " successfully created\n";
 }
 
-void disconnectNodes(const std::vector<std::string> &args){
+void disconnectVertexs(const std::vector<std::string> &args){
     if(!checkFourArgs(args)){
         return;
     }
-    const Node* node1 = NodeRegistry::getInstance().getNode(args[1]);
-    const Node* node2 = NodeRegistry::getInstance().getNode(args[3]);
-    if(!node1){
-        std::cout << "Node with id " << args[1] << " not found in database\n";
+    const Vertex* vertex1 = VertexRegistry::getInstance().getVertex(args[1]);
+    const Vertex* vertex2 = VertexRegistry::getInstance().getVertex(args[3]);
+    if(!vertex1){
+        std::cout << "Vertex with id " << args[1] << " not found in database\n";
         return;
     }
-    if(!node2){
-        std::cout << "Node with id " << args[3] << " not found in database\n";
+    if(!vertex2){
+        std::cout << "Vertex with id " << args[3] << " not found in database\n";
         return;
     }
-    if(!NodeRegistry::getInstance().disconnectNodes(args[1], args[2], args[3])){
+    if(!VertexRegistry::getInstance().disconnectVertices(args[1], args[2], args[3])){
         std::cout << "Connection ";
         printConnection(args[1], args[2], args[3]);
         std::cout << " not found in database\n";
@@ -152,9 +152,9 @@ void query(const std::vector<std::string> &args){
     std::cout << "Query result:\n";
     // ? ? ? or ? conn ? (1/8, 2/8)
     if(args[1] == "?" && args[3] == "?"){
-        std::vector<std::string> allNodes = NodeRegistry::getInstance().getAllIds();
-        for(const auto& id : allNodes){
-            for(auto c : NodeRegistry::getInstance().getNode(id)->getOutputConnections()){
+        std::vector<std::string> allVertexs = VertexRegistry::getInstance().getAllIds();
+        for(const auto& id : allVertexs){
+            for(auto c : VertexRegistry::getInstance().getVertex(id)->getOutputConnections()){
                 if (args[2] != "?" && c.first != args[2]){
                     continue;
                 }
@@ -166,12 +166,12 @@ void query(const std::vector<std::string> &args){
     }
     // ? ? id2 or ? conn id2 (3/8, 4/8)
     if(args[1] == "?" && args[3] != "?"){
-        const Node* node2 = NodeRegistry::getInstance().getNode(args[3]);
-        if(!node2){
-            std::cout << "Node with id " << args[3] << " not found in database\n";
+        const Vertex* vertex2 = VertexRegistry::getInstance().getVertex(args[3]);
+        if(!vertex2){
+            std::cout << "Vertex with id " << args[3] << " not found in database\n";
             return;
         }
-        for(auto c : node2->getInputConnections()){
+        for(auto c : vertex2->getInputConnections()){
             if (args[2] != "?" && c.first != args[2]){
                 continue;
             }
@@ -182,12 +182,12 @@ void query(const std::vector<std::string> &args){
     }
     // id1 ? ? or id1 conn ? (5/8, 6/8)
     if(args[1] != "?" && args[3] == "?"){
-        const Node* node1 = NodeRegistry::getInstance().getNode(args[1]);
-        if(!node1){
-            std::cout << "Node with id " << args[1] << " not found in database\n";
+        const Vertex* vertex1 = VertexRegistry::getInstance().getVertex(args[1]);
+        if(!vertex1){
+            std::cout << "Vertex with id " << args[1] << " not found in database\n";
             return;
         }
-        for(auto c : node1->getOutputConnections()){
+        for(auto c : vertex1->getOutputConnections()){
             if (args[2] != "?" && c.first != args[2]){
                 continue;
             }
@@ -198,17 +198,17 @@ void query(const std::vector<std::string> &args){
     }
     // id1 ? id2 or id1 conn id2 (7/8, 8/8)
     if(args[1] != "?" && args[3] != "?"){
-        const Node* node1 = NodeRegistry::getInstance().getNode(args[1]);
-        const Node* node2 = NodeRegistry::getInstance().getNode(args[3]);
-        if(!node1){
-            std::cout << "Node with id " << args[1] << " not found in database\n";
+        const Vertex* vertex1 = VertexRegistry::getInstance().getVertex(args[1]);
+        const Vertex* vertex2 = VertexRegistry::getInstance().getVertex(args[3]);
+        if(!vertex1){
+            std::cout << "Vertex with id " << args[1] << " not found in database\n";
             return;
         }
-        if(!node2){
-            std::cout << "Node with id " << args[3] << " not found in database\n";
+        if(!vertex2){
+            std::cout << "Vertex with id " << args[3] << " not found in database\n";
             return;
         }
-        for(auto c : node1->getOutputConnections()){
+        for(auto c : vertex1->getOutputConnections()){
             if (c.second != args[3]){
                 continue;
             }
@@ -236,19 +236,19 @@ int main() {
             continue;
         }
         if(command == "add"){
-            addNode(parsed);
+            addVertex(parsed);
         }
         else if(command == "read"){
-            readNode(parsed);
+            readVertex(parsed);
         }
         else if(command == "delete"){
-            deleteNode(parsed);
+            deleteVertex(parsed);
         }
         else if(command == "connect"){
-            connectNodes(parsed);
+            connectVertexs(parsed);
         }
         else if(command == "disconnect"){
-            disconnectNodes(parsed);
+            disconnectVertexs(parsed);
         }
         else if(command == "query"){
             query(parsed);

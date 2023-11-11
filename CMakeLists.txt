@@ -5,8 +5,8 @@ set(CMAKE_CXX_STANDARD 17)
 
 add_executable(DB
         main.cpp
-        Node.cpp
-        NodeCluster.cpp
-        NodeRegistry.cpp
+        Vertex.cpp
+        VertexCluster.cpp
+        VertexRegistry.cpp
         utils.cpp
 )

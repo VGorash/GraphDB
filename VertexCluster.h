@@ -2,27 +2,27 @@
 // Created by goras on 10.11.2023.
 //
 
-#ifndef DB_NODECLUSTER_H
-#define DB_NODECLUSTER_H
+#ifndef DB_VERTEXCLUSTER_H
+#define DB_VERTEXCLUSTER_H
 
 #include <unordered_map>
 #include <string>
 #include <vector>
 
-class Node;
+class Vertex;
 
-class NodeCluster {
+class VertexCluster {
 
-    friend class NodeRegistry;
+    friend class VertexRegistry;
 
 public:
-    NodeCluster(const NodeCluster&) = delete;
-    void operator=(const NodeCluster&) = delete;
+    VertexCluster(const VertexCluster&) = delete;
+    void operator=(const VertexCluster&) = delete;
 
 private:
-    Node* getNode(const std::string& id);
-    Node* addNode(const std::string& id);
-    bool deleteNode(const std::string& id);
+    Vertex* getVertex(const std::string& id);
+    Vertex* addVertex(const std::string& id);
+    bool deleteVertex(const std::string& id);
 
     bool addConnection(const std::string& id1, const std::string& connName, const std::string& id2, bool reverse=false);
     bool removeConnection(const std::string& id1, const std::string& connName, const std::string& id2, bool reverse=false);
@@ -33,15 +33,15 @@ private:
     bool load();
     std::pair<size_t, size_t> getHashRange() const;
 
-    explicit NodeCluster(std::pair<size_t, size_t> hashRange);
-    ~NodeCluster();
+    explicit VertexCluster(std::pair<size_t, size_t> hashRange);
+    ~VertexCluster();
 
 private:
     std::hash<std::string> m_hasher;
-    std::unordered_map<std::string, Node*> m_nodes;
+    std::unordered_map<std::string, Vertex*> m_vertices;
 
     std::pair<size_t, size_t> m_hashRange;
 };
 
 
-#endif //DB_NODECLUSTER_H
+#endif //DB_VERTEXCLUSTER_H

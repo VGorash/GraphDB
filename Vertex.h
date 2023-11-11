@@ -2,16 +2,16 @@
 // Created by goras on 10.11.2023.
 //
 
-#ifndef DB_NODE_H
-#define DB_NODE_H
+#ifndef DB_VERTEX_H
+#define DB_VERTEX_H
 
 #include <string>
 #include <set>
 
 
-class Node {
+class Vertex {
 
-    friend class NodeCluster;
+    friend class VertexCluster;
 
 public:
     const std::string &getId() const;
@@ -20,8 +20,8 @@ public:
 
     const std::string toString() const;
 
-    Node(const Node&) = delete;
-    void operator=(const Node&) = delete;
+    Vertex(const Vertex&) = delete;
+    void operator=(const Vertex&) = delete;
 
 private:
     bool connect(const std::string &connName, const std::string &id, bool reverse = false);
@@ -29,8 +29,8 @@ private:
 
     bool fillFromString(const std::string &inputString);
 
-    explicit Node(std::string id);
-    ~Node() = default;
+    explicit Vertex(std::string id);
+    ~Vertex() = default;
 
 private:
     std::string m_id;
@@ -40,4 +40,4 @@ private:
 };
 
 
-#endif //DB_NODE_H
+#endif //DB_VERTEX_H
