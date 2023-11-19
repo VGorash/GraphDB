@@ -7,6 +7,7 @@
 
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 class VertexCluster;
 class Vertex;
@@ -32,8 +33,14 @@ private:
     VertexRegistry();
     ~VertexRegistry();
 
+    bool loadConfig();
+
+    VertexCluster *getClusterForId(const std::string& id) const;
+
 private:
-    VertexCluster* m_cluster;
+    int m_numClusters;
+    std::vector<VertexCluster*> m_clusters;
+    std::hash<std::string> m_hasher;
 };
 
 
