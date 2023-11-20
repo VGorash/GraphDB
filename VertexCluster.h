@@ -22,15 +22,15 @@ public:
 private:
     Vertex* getVertex(const std::string& id);
     Vertex* addVertex(const std::string& id);
-    bool deleteVertex(const std::string& id);
+    void deleteVertex(const std::string& id);
 
-    bool addConnection(const std::string& id1, const std::string& connName, const std::string& id2, bool reverse=false);
-    bool removeConnection(const std::string& id1, const std::string& connName, const std::string& id2, bool reverse=false);
+    void addConnection(const std::string& id1, const std::string& connName, const std::string& id2, bool reverse=false);
+    void removeConnection(const std::string& id1, const std::string& connName, const std::string& id2, bool reverse=false);
 
     std::vector<std::string> getAllIds() const;
 
-    bool dump() const;
-    bool load();
+    void dump() const;
+    void load();
     std::pair<size_t, size_t> getHashRange() const;
 
     explicit VertexCluster(std::pair<size_t, size_t> hashRange);

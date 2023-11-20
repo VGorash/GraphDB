@@ -2,11 +2,11 @@
 // Created by goras on 10.11.2023.
 //
 
+#include "VertexExceptions.h"
 #include "VertexRegistry.h"
 #include "VertexCluster.h"
 #include "Vertex.h"
 
-#include <string>
 #include <fstream>
 #include <filesystem>
 
@@ -31,7 +31,6 @@ VertexRegistry::VertexRegistry() {
 
 VertexRegistry::~VertexRegistry() {
     for(auto c : m_clusters){
-        c->dump();
         delete c;
     }
 }
@@ -44,7 +43,7 @@ VertexRegistry &VertexRegistry::getInstance() {
 const Vertex *VertexRegistry::getVertex(const std::string &id) const {
     auto cluster = getClusterForId(id);
     if(!cluster){
-        return nullptr;
+        throw std::exception("Cluster configuration error");
     }
     return cluster->getVertex(id);
 }
@@ -52,61 +51,50 @@ const Vertex *VertexRegistry::getVertex(const std::string &id) const {
 const Vertex *VertexRegistry::addVertex(const std::string &id) const {
     auto cluster = getClusterForId(id);
     if(!cluster){
-        return nullptr;
+        throw std::exception("Cluster configuration error");
     }
     return cluster->addVertex(id);
 }
 
-bool VertexRegistry::deleteVertex(const std::string &id) const {
+void VertexRegistry::deleteVertex(const std::string &id) const {
     auto cluster = getClusterForId(id);
     if(!cluster){
-        return false;
+        throw std::exception("Cluster configuration error");
     }
     const Vertex *vertex = getVertex(id);
-    if(!vertex){
-        return false;
-    }
-    for(auto c : std::set<std::pair<std::string, std::string>>(vertex->getOutputConnections())){
+    for(const auto& c : std::set<std::pair<std::string, std::string>>(vertex->getOutputConnections())){
         disconnectVertices(id, c.first, c.second);
     }
-    for(auto c : std::set<std::pair<std::string, std::string>>(vertex->getInputConnections())){
+    for(const auto& c : std::set<std::pair<std::string, std::string>>(vertex->getInputConnections())){
         disconnectVertices(c.second, c.first, id);
     }
-    return cluster->deleteVertex(id);
+    cluster->deleteVertex(id);
 }
 
-bool VertexRegistry::connectVertices(const std::string &id1, const std::string &connName, const std::string &id2) const {
+void VertexRegistry::connectVertices(const std::string &id1, const std::string &connName, const std::string &id2) const {
     auto cluster1 = getClusterForId(id1);
     auto cluster2 = getClusterForId(id2);
     if(!cluster1 || !cluster2){
-        return false;
+        throw std::exception("Cluster configuration error");
     }
     const Vertex *vertex1 = getVertex(id1);
     const Vertex *vertex2 = getVertex(id2);
-    if(!vertex1 || !vertex2){
-        return false;
-    }
-    bool res = true;
-    res &= cluster1->addConnection(vertex1->getId(), connName, vertex2->getId());
-    res &= cluster2->addConnection(vertex2->getId(), connName, vertex1->getId(), true);
-    return res;
+
+    cluster1->addConnection(vertex1->getId(), connName, vertex2->getId());
+    cluster2->addConnection(vertex2->getId(), connName, vertex1->getId(), true);
 }
 
-bool VertexRegistry::disconnectVertices(const std::string &id1, const std::string &connName, const std::string &id2) const {
+void VertexRegistry::disconnectVertices(const std::string &id1, const std::string &connName, const std::string &id2) const {
     auto cluster1 = getClusterForId(id1);
     auto cluster2 = getClusterForId(id2);
     if(!cluster1 || !cluster2){
-        return false;
+        throw std::exception("Cluster configuration error");
     }
     const Vertex *vertex1 = getVertex(id1);
     const Vertex *vertex2 = getVertex(id2);
-    if(!vertex1 || !vertex2){
-        return false;
-    }
-    bool res = true;
-    res &= cluster1->removeConnection(vertex1->getId(), connName, vertex2->getId());
-    res &= cluster2->removeConnection(vertex2->getId(), connName, vertex1->getId(), true);
-    return res;
+
+    cluster1->removeConnection(vertex1->getId(), connName, vertex2->getId());
+    cluster2->removeConnection(vertex2->getId(), connName, vertex1->getId(), true);
 }
 
 std::vector<std::string> VertexRegistry::getAllIds() const {
@@ -118,18 +106,17 @@ std::vector<std::string> VertexRegistry::getAllIds() const {
     return result;
 }
 
-bool VertexRegistry::loadConfig() {
+void VertexRegistry::loadConfig() {
     fs::path config_dir("config");
     if(!fs::exists(config_dir)){
-        return false;
+        throw std::exception("Cannot find config dir");
     }
     fs::path filepath = config_dir / ("clusters.txt");
     if(!fs::exists(filepath)){
-        return false;
+        throw std::exception("Cannot find config file");
     }
     std::ifstream inFile(filepath);
     inFile >> m_numClusters;
-    return true;
 }
 
 VertexCluster *VertexRegistry::getClusterForId(const std::string &id) const {

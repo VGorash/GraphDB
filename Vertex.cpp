@@ -3,6 +3,7 @@
 //
 
 #include "utils.h"
+#include "VertexExceptions.h"
 #include "Vertex.h"
 
 #include <utility>
@@ -21,43 +22,41 @@ const std::set<std::pair<std::string, std::string>> &Vertex::getInputConnections
     return m_inputConnections;
 }
 
-bool Vertex::connect(const std::string &connName, const std::string &id, bool reverse) {
+void Vertex::connect(const std::string &connName, const std::string &id, bool reverse) {
     std::set<std::pair<std::string, std::string>> &conns = reverse ? m_inputConnections : m_outputConnections;
 
     if(conns.find({connName, id}) != conns.end()){
-        return false;
+        throw ConnectionOperationException(m_id, id, connName, reverse);
     }
     conns.insert({connName, id});
-    return true;
 }
 
-bool Vertex::disconnect(const std::string &connName, const std::string &id, bool reverse) {
+void Vertex::disconnect(const std::string &connName, const std::string &id, bool reverse) {
     std::set<std::pair<std::string, std::string>> &conns = reverse ? m_inputConnections : m_outputConnections;
 
     if(conns.find({connName, id}) == conns.end()){
-        return false;
+        throw ConnectionOperationException(m_id, id, connName, reverse);
     }
     conns.erase({connName, id});
-    return true;
 }
 
-const std::string Vertex::toString() const {
+std::string Vertex::toString() const {
     std::string result;
     result += m_id;
     result += "|";
-    for(auto c : m_outputConnections){
+    for(const auto& c : m_outputConnections){
         result += c.first + "," + c.second;
         result += ";";
     }
     result += "|";
-    for(auto c : m_inputConnections){
+    for(const auto& c : m_inputConnections){
         result += c.first + "," + c.second;
         result += ";";
     }
     return result;
 }
 
-bool Vertex::fillFromString(const std::string &inputString) {
+void Vertex::fillFromString(const std::string &inputString) {
     m_inputConnections.clear();
     m_outputConnections.clear();
     auto parsedVertex = split(inputString, '|');
@@ -76,6 +75,5 @@ bool Vertex::fillFromString(const std::string &inputString) {
         auto connection = split(c, ',');
         m_inputConnections.insert({connection[0], connection[1]});
     }
-    return true;
 }
 

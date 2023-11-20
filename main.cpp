@@ -1,6 +1,7 @@
 #include "VertexRegistry.h"
 #include "Vertex.h"
 #include "utils.h"
+#include "VertexExceptions.h"
 #include <regex>
 
 bool check_id(const std::string &id){
@@ -64,8 +65,10 @@ void addVertex(const std::vector<std::string> &args){
     if(!checkTwoArgs(args)){
         return;
     }
-    const Vertex* vertex = VertexRegistry::getInstance().addVertex(args[1]);
-    if(!vertex){
+    try{
+        VertexRegistry::getInstance().addVertex(args[1]);
+    }
+    catch(VertexOperationException &e){
         std::cout << "Vertex with id " << args[1] << " already exists in database\n";
         return;
     }
@@ -76,8 +79,11 @@ void readVertex(const std::vector<std::string> &args){
     if(!checkTwoArgs(args)){
         return;
     }
-    const Vertex* vertex = VertexRegistry::getInstance().getVertex(args[1]);
-    if(!vertex){
+    const Vertex* vertex;
+    try{
+       vertex = VertexRegistry::getInstance().getVertex(args[1]);
+    }
+    catch(VertexOperationException &e){
         std::cout << "Vertex with id " << args[1] << " not found in database\n";
         return;
     }
@@ -88,28 +94,28 @@ void deleteVertex(const std::vector<std::string> &args){
     if(!checkTwoArgs(args)){
         return;
     }
-    if(!VertexRegistry::getInstance().deleteVertex(args[1])){
+    try{
+        VertexRegistry::getInstance().deleteVertex(args[1]);
+    }
+    catch (VertexOperationException &e){
         std::cout << "Vertex with id " << args[1] << " not found in database\n";
         return;
     }
     std::cout << "Vertex successfully deleted\n";
 }
 
-void connectVertexs(const std::vector<std::string> &args){
+void connectVertices(const std::vector<std::string> &args){
     if(!checkFourArgs(args)){
         return;
     }
-    const Vertex* vertex1 = VertexRegistry::getInstance().getVertex(args[1]);
-    const Vertex* vertex2 = VertexRegistry::getInstance().getVertex(args[3]);
-    if(!vertex1){
-        std::cout << "Vertex with id " << args[1] << " not found in database\n";
+    try{
+        VertexRegistry::getInstance().connectVertices(args[1], args[2], args[3]);
+    }
+    catch (VertexOperationException &e){
+        std::cout << "Vertex with id " << e.vertexId << " not found in database\n";
         return;
     }
-    if(!vertex2){
-        std::cout << "Vertex with id " << args[3] << " not found in database\n";
-        return;
-    }
-    if(!VertexRegistry::getInstance().connectVertices(args[1], args[2], args[3])){
+    catch (ConnectionOperationException &e){
         std::cout << "Connection ";
         printConnection(args[1], args[2], args[3]);
         std::cout << " already exists in database\n";
@@ -124,17 +130,14 @@ void disconnectVertexs(const std::vector<std::string> &args){
     if(!checkFourArgs(args)){
         return;
     }
-    const Vertex* vertex1 = VertexRegistry::getInstance().getVertex(args[1]);
-    const Vertex* vertex2 = VertexRegistry::getInstance().getVertex(args[3]);
-    if(!vertex1){
-        std::cout << "Vertex with id " << args[1] << " not found in database\n";
+    try{
+        VertexRegistry::getInstance().disconnectVertices(args[1], args[2], args[3]);
+    }
+    catch (VertexOperationException &e){
+        std::cout << "Vertex with id " << e.vertexId << " not found in database\n";
         return;
     }
-    if(!vertex2){
-        std::cout << "Vertex with id " << args[3] << " not found in database\n";
-        return;
-    }
-    if(!VertexRegistry::getInstance().disconnectVertices(args[1], args[2], args[3])){
+    catch (ConnectionOperationException &e){
         std::cout << "Connection ";
         printConnection(args[1], args[2], args[3]);
         std::cout << " not found in database\n";
@@ -154,7 +157,7 @@ void query(const std::vector<std::string> &args){
     if(args[1] == "?" && args[3] == "?"){
         std::vector<std::string> allVertexs = VertexRegistry::getInstance().getAllIds();
         for(const auto& id : allVertexs){
-            for(auto c : VertexRegistry::getInstance().getVertex(id)->getOutputConnections()){
+            for(const auto& c : VertexRegistry::getInstance().getVertex(id)->getOutputConnections()){
                 if (args[2] != "?" && c.first != args[2]){
                     continue;
                 }
@@ -166,12 +169,15 @@ void query(const std::vector<std::string> &args){
     }
     // ? ? id2 or ? conn id2 (3/8, 4/8)
     if(args[1] == "?" && args[3] != "?"){
-        const Vertex* vertex2 = VertexRegistry::getInstance().getVertex(args[3]);
-        if(!vertex2){
-            std::cout << "Vertex with id " << args[3] << " not found in database\n";
+        const Vertex* vertex2;
+        try{
+            vertex2 = VertexRegistry::getInstance().getVertex(args[3]);
+        }
+        catch (VertexOperationException &e){
+            std::cout << "Vertex with id " << e.vertexId << " not found in database\n";
             return;
         }
-        for(auto c : vertex2->getInputConnections()){
+        for(const auto& c : vertex2->getInputConnections()){
             if (args[2] != "?" && c.first != args[2]){
                 continue;
             }
@@ -182,12 +188,15 @@ void query(const std::vector<std::string> &args){
     }
     // id1 ? ? or id1 conn ? (5/8, 6/8)
     if(args[1] != "?" && args[3] == "?"){
-        const Vertex* vertex1 = VertexRegistry::getInstance().getVertex(args[1]);
-        if(!vertex1){
-            std::cout << "Vertex with id " << args[1] << " not found in database\n";
+        const Vertex* vertex1;
+        try {
+            vertex1 = VertexRegistry::getInstance().getVertex(args[1]);
+        }
+        catch (VertexOperationException &e){
+            std::cout << "Vertex with id " << e.vertexId << " not found in database\n";
             return;
         }
-        for(auto c : vertex1->getOutputConnections()){
+        for(const auto& c : vertex1->getOutputConnections()){
             if (args[2] != "?" && c.first != args[2]){
                 continue;
             }
@@ -198,17 +207,16 @@ void query(const std::vector<std::string> &args){
     }
     // id1 ? id2 or id1 conn id2 (7/8, 8/8)
     if(args[1] != "?" && args[3] != "?"){
-        const Vertex* vertex1 = VertexRegistry::getInstance().getVertex(args[1]);
-        const Vertex* vertex2 = VertexRegistry::getInstance().getVertex(args[3]);
-        if(!vertex1){
-            std::cout << "Vertex with id " << args[1] << " not found in database\n";
+        const Vertex* vertex1;
+        try{
+            vertex1 = VertexRegistry::getInstance().getVertex(args[1]);
+            VertexRegistry::getInstance().getVertex(args[3]);
+        }
+        catch (VertexOperationException &e){
+            std::cout << "Vertex with id " << e.vertexId << " not found in database\n";
             return;
         }
-        if(!vertex2){
-            std::cout << "Vertex with id " << args[3] << " not found in database\n";
-            return;
-        }
-        for(auto c : vertex1->getOutputConnections()){
+        for(const auto& c : vertex1->getOutputConnections()){
             if (c.second != args[3]){
                 continue;
             }
@@ -245,7 +253,7 @@ int main() {
             deleteVertex(parsed);
         }
         else if(command == "connect"){
-            connectVertexs(parsed);
+            connectVertices(parsed);
         }
         else if(command == "disconnect"){
             disconnectVertexs(parsed);

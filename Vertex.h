@@ -18,16 +18,16 @@ public:
     const std::set<std::pair<std::string, std::string>> &getOutputConnections() const;
     const std::set<std::pair<std::string, std::string>> &getInputConnections() const;
 
-    const std::string toString() const;
+    std::string toString() const;
 
     Vertex(const Vertex&) = delete;
     void operator=(const Vertex&) = delete;
 
 private:
-    bool connect(const std::string &connName, const std::string &id, bool reverse = false);
-    bool disconnect(const std::string &connName, const std::string &id, bool reverse = false);
+    void connect(const std::string &connName, const std::string &id, bool reverse = false);
+    void disconnect(const std::string &connName, const std::string &id, bool reverse = false);
 
-    bool fillFromString(const std::string &inputString);
+    void fillFromString(const std::string &inputString);
 
     explicit Vertex(std::string id);
     ~Vertex() = default;

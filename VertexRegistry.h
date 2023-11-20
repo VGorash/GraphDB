@@ -19,10 +19,10 @@ public:
 
     const Vertex* getVertex(const std::string& id) const;
     const Vertex* addVertex(const std::string& id) const;
-    bool deleteVertex(const std::string& id) const;
+    void deleteVertex(const std::string& id) const;
 
-    bool connectVertices(const std::string &id1, const std::string &connName, const std::string &id2) const;
-    bool disconnectVertices(const std::string &id1, const std::string &connName, const std::string &id2) const;
+    void connectVertices(const std::string &id1, const std::string &connName, const std::string &id2) const;
+    void disconnectVertices(const std::string &id1, const std::string &connName, const std::string &id2) const;
 
     std::vector<std::string> getAllIds() const;
 
@@ -33,12 +33,12 @@ private:
     VertexRegistry();
     ~VertexRegistry();
 
-    bool loadConfig();
+    void loadConfig();
 
     VertexCluster *getClusterForId(const std::string& id) const;
 
 private:
-    int m_numClusters;
+    int m_numClusters{};
     std::vector<VertexCluster*> m_clusters;
     std::hash<std::string> m_hasher;
 };
