@@ -12,6 +12,7 @@
 #include <unordered_map>
 
 class VertexCluster;
+
 class Vertex;
 
 class VertexRegistry {
@@ -31,11 +32,13 @@ public:
 
     std::vector<std::string> getAllIds();
 
-    VertexRegistry(const VertexRegistry&) = delete;
-    void operator=(const VertexRegistry&) = delete;
+    VertexRegistry(const VertexRegistry &) = delete;
+
+    void operator=(const VertexRegistry &) = delete;
 
 private:
     VertexRegistry();
+
     ~VertexRegistry();
 
     void loadConfig();
@@ -50,7 +53,7 @@ private:
 
 private:
     int m_numClusters{};
-    std::vector<VertexCluster*> m_clusters;
+    std::vector<VertexCluster *> m_clusters;
     std::hash<std::string> m_hasher;
 
     std::unordered_set<std::string> m_lockedVertices;

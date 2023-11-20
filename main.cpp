@@ -4,118 +4,118 @@
 #include "VertexExceptions.h"
 #include <regex>
 
-bool check_id(const std::string &id){
+bool check_id(const std::string &id) {
     std::regex pattern("^[A-Za-z0-9_]+$");
     return std::regex_match(id, pattern);
 }
 
-bool checkTwoArgs(const std::vector<std::string> &args){
-    if(args.size() != 2){
+bool checkTwoArgs(const std::vector<std::string> &args) {
+    if (args.size() != 2) {
         std::cout << "Expected 1 argument " << args.size() - 1 << " provided\n";
         return false;
     }
-    const std::string& id = args[1];
-    if(id.empty() || !check_id(id)){
+    const std::string &id = args[1];
+    if (id.empty() || !check_id(id)) {
         std::cout << "ID must contain only letters, digits and '_' symbol\n";
         return false;
     }
     return true;
 }
 
-bool checkFourArgs(const std::vector<std::string> &args, bool query=false){
-    if(args.size() != 4){
+bool checkFourArgs(const std::vector<std::string> &args, bool query = false) {
+    if (args.size() != 4) {
         std::cout << "Expected 3 arguments " << args.size() - 1 << " provided\n";
         return false;
     }
-    const std::string& id1 = args[1];
-    const std::string& connName = args[2];
-    const std::string& id2 = args[3];
-    if((id1.empty() || !check_id(id1)) && (!query || id1 != "?")){
+    const std::string &id1 = args[1];
+    const std::string &connName = args[2];
+    const std::string &id2 = args[3];
+    if ((id1.empty() || !check_id(id1)) && (!query || id1 != "?")) {
         std::cout << "ID must contain only letters, digits and '_' symbol\n";
         return false;
     }
-    if(id2.empty() || !check_id(id2) && (!query || id2 != "?")){
+    if (id2.empty() || !check_id(id2) && (!query || id2 != "?")) {
         std::cout << "ID must contain only letters, digits and '_' symbol\n";
         return false;
     }
-    if(connName.empty() || !check_id(connName) && (!query || connName != "?")){
+    if (connName.empty() || !check_id(connName) && (!query || connName != "?")) {
         std::cout << "Connection name must contain only letters, digits and '_' symbol\n";
         return false;
     }
     return true;
 }
 
-void printVertex(const Vertex* vertex){
+void printVertex(const Vertex *vertex) {
     std::cout << "ID: " << vertex->getId() << "\n";
     std::cout << "Output connections: " << "\n";
-    for(const auto& c : vertex->getOutputConnections()){
+    for (const auto &c: vertex->getOutputConnections()) {
         std::cout << "\t --(" << c.first << ")--> " << c.second << "\n";
     }
     std::cout << "Input connections: " << "\n";
-    for(const auto& c : vertex->getInputConnections()){
+    for (const auto &c: vertex->getInputConnections()) {
         std::cout << "\t <--(" << c.first << ")-- " << c.second << "\n";
     }
 }
 
-void printConnection(const std::string &id1, const std::string &connName, const std::string &id2){
-    std::cout << id1 << " --(" << connName << ")--> " <<id2;
+void printConnection(const std::string &id1, const std::string &connName, const std::string &id2) {
+    std::cout << id1 << " --(" << connName << ")--> " << id2;
 }
 
-void addVertex(const std::vector<std::string> &args){
-    if(!checkTwoArgs(args)){
+void addVertex(const std::vector<std::string> &args) {
+    if (!checkTwoArgs(args)) {
         return;
     }
-    try{
+    try {
         VertexRegistry::getInstance().addVertex(args[1]);
     }
-    catch(VertexOperationException &e){
+    catch (VertexOperationException &e) {
         std::cout << "Vertex with id " << args[1] << " already exists in database\n";
         return;
     }
     std::cout << "Vertex added\n";
 }
 
-void readVertex(const std::vector<std::string> &args){
-    if(!checkTwoArgs(args)){
+void readVertex(const std::vector<std::string> &args) {
+    if (!checkTwoArgs(args)) {
         return;
     }
-    const Vertex* vertex;
-    try{
-       vertex = VertexRegistry::getInstance().getVertex(args[1]);
+    const Vertex *vertex;
+    try {
+        vertex = VertexRegistry::getInstance().getVertex(args[1]);
     }
-    catch(VertexOperationException &e){
+    catch (VertexOperationException &e) {
         std::cout << "Vertex with id " << args[1] << " not found in database\n";
         return;
     }
     printVertex(vertex);
 }
 
-void deleteVertex(const std::vector<std::string> &args){
-    if(!checkTwoArgs(args)){
+void deleteVertex(const std::vector<std::string> &args) {
+    if (!checkTwoArgs(args)) {
         return;
     }
-    try{
+    try {
         VertexRegistry::getInstance().deleteVertex(args[1]);
     }
-    catch (VertexOperationException &e){
+    catch (VertexOperationException &e) {
         std::cout << "Vertex with id " << args[1] << " not found in database\n";
         return;
     }
     std::cout << "Vertex successfully deleted\n";
 }
 
-void connectVertices(const std::vector<std::string> &args){
-    if(!checkFourArgs(args)){
+void connectVertices(const std::vector<std::string> &args) {
+    if (!checkFourArgs(args)) {
         return;
     }
-    try{
+    try {
         VertexRegistry::getInstance().connectVertices(args[1], args[2], args[3]);
     }
-    catch (VertexOperationException &e){
+    catch (VertexOperationException &e) {
         std::cout << "Vertex with id " << e.vertexId << " not found in database\n";
         return;
     }
-    catch (ConnectionOperationException &e){
+    catch (ConnectionOperationException &e) {
         std::cout << "Connection ";
         printConnection(args[1], args[2], args[3]);
         std::cout << " already exists in database\n";
@@ -126,18 +126,18 @@ void connectVertices(const std::vector<std::string> &args){
     std::cout << " successfully created\n";
 }
 
-void disconnectVertexs(const std::vector<std::string> &args){
-    if(!checkFourArgs(args)){
+void disconnectVertexs(const std::vector<std::string> &args) {
+    if (!checkFourArgs(args)) {
         return;
     }
-    try{
+    try {
         VertexRegistry::getInstance().disconnectVertices(args[1], args[2], args[3]);
     }
-    catch (VertexOperationException &e){
+    catch (VertexOperationException &e) {
         std::cout << "Vertex with id " << e.vertexId << " not found in database\n";
         return;
     }
-    catch (ConnectionOperationException &e){
+    catch (ConnectionOperationException &e) {
         std::cout << "Connection ";
         printConnection(args[1], args[2], args[3]);
         std::cout << " not found in database\n";
@@ -148,17 +148,17 @@ void disconnectVertexs(const std::vector<std::string> &args){
     std::cout << " successfully deleted\n";
 }
 
-void query(const std::vector<std::string> &args){
-    if(!checkFourArgs(args, true)){
+void query(const std::vector<std::string> &args) {
+    if (!checkFourArgs(args, true)) {
         return;
     }
     std::cout << "Query result:\n";
     // ? ? ? or ? conn ? (1/8, 2/8)
-    if(args[1] == "?" && args[3] == "?"){
+    if (args[1] == "?" && args[3] == "?") {
         std::vector<std::string> allVertexs = VertexRegistry::getInstance().getAllIds();
-        for(const auto& id : allVertexs){
-            for(const auto& c : VertexRegistry::getInstance().getVertex(id)->getOutputConnections()){
-                if (args[2] != "?" && c.first != args[2]){
+        for (const auto &id: allVertexs) {
+            for (const auto &c: VertexRegistry::getInstance().getVertex(id)->getOutputConnections()) {
+                if (args[2] != "?" && c.first != args[2]) {
                     continue;
                 }
                 std::cout << "\t";
@@ -168,17 +168,17 @@ void query(const std::vector<std::string> &args){
         }
     }
     // ? ? id2 or ? conn id2 (3/8, 4/8)
-    if(args[1] == "?" && args[3] != "?"){
-        const Vertex* vertex2;
-        try{
+    if (args[1] == "?" && args[3] != "?") {
+        const Vertex *vertex2;
+        try {
             vertex2 = VertexRegistry::getInstance().getVertex(args[3]);
         }
-        catch (VertexOperationException &e){
+        catch (VertexOperationException &e) {
             std::cout << "Vertex with id " << e.vertexId << " not found in database\n";
             return;
         }
-        for(const auto& c : vertex2->getInputConnections()){
-            if (args[2] != "?" && c.first != args[2]){
+        for (const auto &c: vertex2->getInputConnections()) {
+            if (args[2] != "?" && c.first != args[2]) {
                 continue;
             }
             std::cout << "\t";
@@ -187,17 +187,17 @@ void query(const std::vector<std::string> &args){
         }
     }
     // id1 ? ? or id1 conn ? (5/8, 6/8)
-    if(args[1] != "?" && args[3] == "?"){
-        const Vertex* vertex1;
+    if (args[1] != "?" && args[3] == "?") {
+        const Vertex *vertex1;
         try {
             vertex1 = VertexRegistry::getInstance().getVertex(args[1]);
         }
-        catch (VertexOperationException &e){
+        catch (VertexOperationException &e) {
             std::cout << "Vertex with id " << e.vertexId << " not found in database\n";
             return;
         }
-        for(const auto& c : vertex1->getOutputConnections()){
-            if (args[2] != "?" && c.first != args[2]){
+        for (const auto &c: vertex1->getOutputConnections()) {
+            if (args[2] != "?" && c.first != args[2]) {
                 continue;
             }
             std::cout << "\t";
@@ -206,21 +206,21 @@ void query(const std::vector<std::string> &args){
         }
     }
     // id1 ? id2 or id1 conn id2 (7/8, 8/8)
-    if(args[1] != "?" && args[3] != "?"){
-        const Vertex* vertex1;
-        try{
+    if (args[1] != "?" && args[3] != "?") {
+        const Vertex *vertex1;
+        try {
             vertex1 = VertexRegistry::getInstance().getVertex(args[1]);
             VertexRegistry::getInstance().getVertex(args[3]);
         }
-        catch (VertexOperationException &e){
+        catch (VertexOperationException &e) {
             std::cout << "Vertex with id " << e.vertexId << " not found in database\n";
             return;
         }
-        for(const auto& c : vertex1->getOutputConnections()){
-            if (c.second != args[3]){
+        for (const auto &c: vertex1->getOutputConnections()) {
+            if (c.second != args[3]) {
                 continue;
             }
-            if (args[2] != "?" && c.first != args[2]){
+            if (args[2] != "?" && c.first != args[2]) {
                 continue;
             }
             std::cout << "\t";
@@ -235,39 +235,31 @@ int main() {
     std::string input;
     std::string command;
 
-    while (!exitFlag){
+    while (!exitFlag) {
         std::cout << ">";
         std::getline(std::cin, input);
         auto parsed = split(input);
         command = lowercase(parsed[0]);
-        if(command.empty()){
+        if (command.empty()) {
             continue;
         }
-        if(command == "add"){
+        if (command == "add") {
             addVertex(parsed);
-        }
-        else if(command == "read"){
+        } else if (command == "read") {
             readVertex(parsed);
-        }
-        else if(command == "delete"){
+        } else if (command == "delete") {
             deleteVertex(parsed);
-        }
-        else if(command == "connect"){
+        } else if (command == "connect") {
             connectVertices(parsed);
-        }
-        else if(command == "disconnect"){
+        } else if (command == "disconnect") {
             disconnectVertexs(parsed);
-        }
-        else if(command == "query"){
+        } else if (command == "query") {
             query(parsed);
-        }
-        else if(command == "exit"){
+        } else if (command == "exit") {
             exitFlag = true;
-        }
-        else if(command == "help"){
+        } else if (command == "help") {
             std::cout << "Some help\n";
-        }
-        else{
+        } else {
             std::cout << "Unknown command. Use 'help' command to get help\n";
         }
     }

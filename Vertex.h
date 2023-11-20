@@ -15,21 +15,26 @@ class Vertex {
 
 public:
     const std::string &getId() const;
+
     const std::set<std::pair<std::string, std::string>> &getOutputConnections() const;
+
     const std::set<std::pair<std::string, std::string>> &getInputConnections() const;
 
     std::string toString() const;
 
-    Vertex(const Vertex&) = delete;
-    void operator=(const Vertex&) = delete;
+    Vertex(const Vertex &) = delete;
+
+    void operator=(const Vertex &) = delete;
 
 private:
     void connect(const std::string &connName, const std::string &id, bool reverse = false);
+
     void disconnect(const std::string &connName, const std::string &id, bool reverse = false);
 
     void fillFromString(const std::string &inputString);
 
     explicit Vertex(std::string id);
+
     ~Vertex() = default;
 
 private:

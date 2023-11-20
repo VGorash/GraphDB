@@ -25,7 +25,7 @@ const std::set<std::pair<std::string, std::string>> &Vertex::getInputConnections
 void Vertex::connect(const std::string &connName, const std::string &id, bool reverse) {
     std::set<std::pair<std::string, std::string>> &conns = reverse ? m_inputConnections : m_outputConnections;
 
-    if(conns.find({connName, id}) != conns.end()){
+    if (conns.find({connName, id}) != conns.end()) {
         throw ConnectionOperationException(m_id, id, connName, reverse);
     }
     conns.insert({connName, id});
@@ -34,7 +34,7 @@ void Vertex::connect(const std::string &connName, const std::string &id, bool re
 void Vertex::disconnect(const std::string &connName, const std::string &id, bool reverse) {
     std::set<std::pair<std::string, std::string>> &conns = reverse ? m_inputConnections : m_outputConnections;
 
-    if(conns.find({connName, id}) == conns.end()){
+    if (conns.find({connName, id}) == conns.end()) {
         throw ConnectionOperationException(m_id, id, connName, reverse);
     }
     conns.erase({connName, id});
@@ -44,12 +44,12 @@ std::string Vertex::toString() const {
     std::string result;
     result += m_id;
     result += "|";
-    for(const auto& c : m_outputConnections){
+    for (const auto &c: m_outputConnections) {
         result += c.first + "," + c.second;
         result += ";";
     }
     result += "|";
-    for(const auto& c : m_inputConnections){
+    for (const auto &c: m_inputConnections) {
         result += c.first + "," + c.second;
         result += ";";
     }
@@ -61,15 +61,15 @@ void Vertex::fillFromString(const std::string &inputString) {
     m_outputConnections.clear();
     auto parsedVertex = split(inputString, '|');
     m_id = parsedVertex[0];
-    for(const auto& c : split(parsedVertex[1], ';')){
-        if(c.empty()){
+    for (const auto &c: split(parsedVertex[1], ';')) {
+        if (c.empty()) {
             continue;
         }
         auto connection = split(c, ',');
         m_outputConnections.insert({connection[0], connection[1]});
     }
-    for(const auto& c : split(parsedVertex[2], ';')){
-        if(c.empty()){
+    for (const auto &c: split(parsedVertex[2], ';')) {
+        if (c.empty()) {
             continue;
         }
         auto connection = split(c, ',');

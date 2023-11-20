@@ -10,6 +10,6 @@
 
 std::string lowercase(std::string input);
 
-std::vector<std::string> split(const std::string &txt, char ch=' ');
+std::vector<std::string> split(const std::string &txt, char ch = ' ');
 
 #endif //DB_UTILS_H
