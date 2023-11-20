@@ -63,7 +63,7 @@ void VertexCluster::removeConnection(const std::string &id1, const std::string &
     getVertex(id1)->disconnect(connName, id2, reverse);
 }
 
-std::vector<std::string> VertexCluster::getAllIds() const {
+std::vector<std::string> VertexCluster::getAllIds() {
     std::vector<std::string> result;
     result.reserve(m_vertices.size());
     for(const auto& n : m_vertices){
@@ -72,7 +72,7 @@ std::vector<std::string> VertexCluster::getAllIds() const {
     return result;
 }
 
-std::pair<size_t, size_t> VertexCluster::getHashRange() const{
+std::pair<size_t, size_t> VertexCluster::getHashRange() {
     return m_hashRange;
 }
 

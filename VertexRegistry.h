@@ -7,6 +7,8 @@
 
 #include <string>
 #include <vector>
+#include <mutex>
+#include <unordered_set>
 #include <unordered_map>
 
 class VertexCluster;
@@ -17,14 +19,17 @@ class VertexRegistry {
 public:
     static VertexRegistry &getInstance();
 
-    const Vertex* getVertex(const std::string& id) const;
-    const Vertex* addVertex(const std::string& id) const;
-    void deleteVertex(const std::string& id) const;
+    const Vertex *getVertex(const std::string &id);
 
-    void connectVertices(const std::string &id1, const std::string &connName, const std::string &id2) const;
-    void disconnectVertices(const std::string &id1, const std::string &connName, const std::string &id2) const;
+    const Vertex *addVertex(const std::string &id);
 
-    std::vector<std::string> getAllIds() const;
+    void deleteVertex(const std::string &id);
+
+    void connectVertices(const std::string &id1, const std::string &connName, const std::string &id2);
+
+    void disconnectVertices(const std::string &id1, const std::string &connName, const std::string &id2);
+
+    std::vector<std::string> getAllIds();
 
     VertexRegistry(const VertexRegistry&) = delete;
     void operator=(const VertexRegistry&) = delete;
@@ -35,12 +40,21 @@ private:
 
     void loadConfig();
 
-    VertexCluster *getClusterForId(const std::string& id) const;
+    VertexCluster *getClusterForId(const std::string &id);
+
+    const Vertex *getVertexNoLock(const std::string &id);
+
+    void connectVerticesNoLock(const std::string &id1, const std::string &connName, const std::string &id2);
+
+    void disconnectVerticesNoLock(const std::string &id1, const std::string &connName, const std::string &id2);
 
 private:
     int m_numClusters{};
     std::vector<VertexCluster*> m_clusters;
     std::hash<std::string> m_hasher;
+
+    std::unordered_set<std::string> m_lockedVertices;
+    std::mutex m_mutex;
 };
 
 

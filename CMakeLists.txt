@@ -9,4 +9,5 @@ add_executable(DB
         VertexCluster.cpp
         VertexRegistry.cpp
         utils.cpp
+        VertexLocker.cpp
 )

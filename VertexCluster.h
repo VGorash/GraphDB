@@ -27,11 +27,12 @@ private:
     void addConnection(const std::string& id1, const std::string& connName, const std::string& id2, bool reverse=false);
     void removeConnection(const std::string& id1, const std::string& connName, const std::string& id2, bool reverse=false);
 
-    std::vector<std::string> getAllIds() const;
+    std::vector<std::string> getAllIds();
 
     void dump() const;
     void load();
-    std::pair<size_t, size_t> getHashRange() const;
+
+    std::pair<size_t, size_t> getHashRange();
 
     explicit VertexCluster(std::pair<size_t, size_t> hashRange);
     ~VertexCluster();
