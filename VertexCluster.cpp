@@ -10,14 +10,30 @@
 #include <iostream>
 #include <fstream>
 #include <filesystem>
+#include <chrono>
 
 namespace fs = std::filesystem;
 
 VertexCluster::VertexCluster(std::pair<size_t, size_t> hashRange) : m_hashRange(hashRange) {
     load();
+
+    m_isTerminating = false;
+    m_timer = std::thread([&]() {
+        int counter = 0;
+        while (!m_isTerminating) {
+            counter = (counter + 1) % 10;
+            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+            if (counter == 0) {
+                dump();
+            }
+        }
+    });
 }
 
 VertexCluster::~VertexCluster() {
+    m_isTerminating = true;
+    m_timer.join();
+
     dump();
     for (const auto &it: m_vertices) {
         delete it.second;

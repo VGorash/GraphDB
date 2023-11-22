@@ -8,6 +8,7 @@
 #include <unordered_map>
 #include <string>
 #include <vector>
+#include <future>
 
 class Vertex;
 
@@ -54,6 +55,9 @@ private:
     std::unordered_map<std::string, Vertex *> m_vertices;
 
     std::pair<size_t, size_t> m_hashRange;
+
+    std::thread m_timer;
+    bool m_isTerminating;
 };
 
 
