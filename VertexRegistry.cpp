@@ -109,11 +109,19 @@ void VertexRegistry::connectVerticesNoLock(const std::string &id1, const std::st
     if (!cluster1 || !cluster2) {
         throw std::exception("Cluster configuration error");
     }
-    const Vertex *vertex1 = getVertexNoLock(id1);
-    const Vertex *vertex2 = getVertexNoLock(id2);
 
-    cluster1->addConnection(vertex1->getId(), connName, vertex2->getId());
-    cluster2->addConnection(vertex2->getId(), connName, vertex1->getId(), true);
+    const Vertex vertex1 = cluster1->createBackup(id1);
+    const Vertex vertex2 = cluster1->createBackup(id2);
+
+    try {
+        cluster1->addConnection(id1, connName, id2);
+        cluster2->addConnection(id2, connName, id1, true);
+    }
+    catch (std::exception &) {
+        cluster1->restoreBackup(vertex1);
+        cluster2->restoreBackup(vertex2);
+        throw;
+    }
 }
 
 void VertexRegistry::disconnectVerticesNoLock(const std::string &id1, const std::string &connName,
@@ -123,11 +131,18 @@ void VertexRegistry::disconnectVerticesNoLock(const std::string &id1, const std:
     if (!cluster1 || !cluster2) {
         throw std::exception("Cluster configuration error");
     }
-    const Vertex *vertex1 = getVertexNoLock(id1);
-    const Vertex *vertex2 = getVertexNoLock(id2);
+    const Vertex vertex1 = cluster1->createBackup(id1);
+    const Vertex vertex2 = cluster1->createBackup(id2);
 
-    cluster1->removeConnection(vertex1->getId(), connName, vertex2->getId());
-    cluster2->removeConnection(vertex2->getId(), connName, vertex1->getId(), true);
+    try {
+        cluster1->removeConnection(id1, connName, id2);
+        cluster2->removeConnection(id2, connName, id1, true);
+    }
+    catch (std::exception &) {
+        cluster1->restoreBackup(vertex1);
+        cluster2->restoreBackup(vertex2);
+        throw;
+    }
 }
 
 void VertexRegistry::loadConfig() {

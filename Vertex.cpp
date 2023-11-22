@@ -10,6 +10,12 @@
 
 Vertex::Vertex(std::string id) : m_id(std::move(id)) {}
 
+Vertex::Vertex(const Vertex &other) {
+    m_id = other.m_id;
+    m_inputConnections = other.m_inputConnections;
+    m_outputConnections = other.m_outputConnections;
+}
+
 const std::string &Vertex::getId() const {
     return m_id;
 }

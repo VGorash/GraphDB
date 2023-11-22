@@ -13,6 +13,8 @@ class Vertex {
 
     friend class VertexCluster;
 
+    friend class VertexRegistry;
+
 public:
     const std::string &getId() const;
 
@@ -21,8 +23,6 @@ public:
     const std::set<std::pair<std::string, std::string>> &getInputConnections() const;
 
     std::string toString() const;
-
-    Vertex(const Vertex &) = delete;
 
     void operator=(const Vertex &) = delete;
 
@@ -34,6 +34,8 @@ private:
     void fillFromString(const std::string &inputString);
 
     explicit Vertex(std::string id);
+
+    Vertex(const Vertex &);
 
     ~Vertex() = default;
 

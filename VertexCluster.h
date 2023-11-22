@@ -13,14 +13,16 @@ class Vertex;
 
 class VertexCluster {
 
-    friend class VertexRegistry;
-
 public:
+
+    explicit VertexCluster(std::pair<size_t, size_t> hashRange);
+
     VertexCluster(const VertexCluster &) = delete;
 
     void operator=(const VertexCluster &) = delete;
 
-private:
+    ~VertexCluster();
+
     Vertex *getVertex(const std::string &id);
 
     Vertex *addVertex(const std::string &id);
@@ -35,15 +37,17 @@ private:
 
     std::vector<std::string> getAllIds();
 
+    std::pair<size_t, size_t> getHashRange();
+
+    Vertex createBackup(const std::string &id);
+
+    void restoreBackup(const Vertex &vertex);
+
+private:
+
     void dump() const;
 
     void load();
-
-    std::pair<size_t, size_t> getHashRange();
-
-    explicit VertexCluster(std::pair<size_t, size_t> hashRange);
-
-    ~VertexCluster();
 
 private:
     std::hash<std::string> m_hasher;

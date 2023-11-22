@@ -121,3 +121,15 @@ void VertexCluster::load() {
         m_vertices.insert({vertex->getId(), vertex});
     }
 }
+
+Vertex VertexCluster::createBackup(const std::string &id) {
+    return {Vertex(*getVertex(id))};
+}
+
+void VertexCluster::restoreBackup(const Vertex &vertex) {
+    Vertex *oldVertex = getVertex(vertex.getId());
+    auto *newVertex = new Vertex(vertex);
+    m_vertices.erase(vertex.getId());
+    m_vertices.insert({newVertex->getId(), newVertex});
+    delete oldVertex;
+}
