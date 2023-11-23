@@ -46,7 +46,7 @@ public:
 
 private:
 
-    void dump() const;
+    void dump();
 
     void load();
 
@@ -57,7 +57,8 @@ private:
     std::pair<size_t, size_t> m_hashRange;
 
     std::thread m_timer;
-    bool m_isTerminating;
+    bool m_terminating;
+    bool m_dirty;
 };
 
 

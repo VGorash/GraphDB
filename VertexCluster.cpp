@@ -17,13 +17,13 @@ namespace fs = std::filesystem;
 VertexCluster::VertexCluster(std::pair<size_t, size_t> hashRange) : m_hashRange(hashRange) {
     load();
 
-    m_isTerminating = false;
+    m_terminating = false;
+    m_dirty = false;
+
     m_timer = std::thread([&]() {
-        int counter = 0;
-        while (!m_isTerminating) {
-            counter = (counter + 1) % 10;
+        while (!m_terminating) {
             std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-            if (counter == 0) {
+            if (m_dirty) {
                 dump();
             }
         }
@@ -31,7 +31,7 @@ VertexCluster::VertexCluster(std::pair<size_t, size_t> hashRange) : m_hashRange(
 }
 
 VertexCluster::~VertexCluster() {
-    m_isTerminating = true;
+    m_terminating = true;
     m_timer.join();
 
     dump();
@@ -58,6 +58,7 @@ Vertex *VertexCluster::addVertex(const std::string &id) {
     }
     auto *vertex = new Vertex(id);
     m_vertices.insert({id, vertex});
+    m_dirty = true;
     return vertex;
 }
 
@@ -69,16 +70,19 @@ void VertexCluster::deleteVertex(const std::string &id) {
     Vertex *temp = m_vertices[id];
     m_vertices.erase(id);
     delete temp;
+    m_dirty = true;
 }
 
 void VertexCluster::addConnection(const std::string &id1, const std::string &connName, const std::string &id2,
                                   bool reverse) {
     getVertex(id1)->connect(connName, id2, reverse);
+    m_dirty = true;
 }
 
 void VertexCluster::removeConnection(const std::string &id1, const std::string &connName, const std::string &id2,
                                      bool reverse) {
     getVertex(id1)->disconnect(connName, id2, reverse);
+    m_dirty = true;
 }
 
 std::vector<std::string> VertexCluster::getAllIds() {
@@ -94,7 +98,7 @@ std::pair<size_t, size_t> VertexCluster::getHashRange() {
     return m_hashRange;
 }
 
-void VertexCluster::dump() const {
+void VertexCluster::dump() {
     fs::path data_dir("data");
     if (!fs::exists(data_dir)) {
         fs::create_directories(data_dir);
@@ -112,6 +116,7 @@ void VertexCluster::dump() const {
     if (outFile.fail()) {
         throw std::exception(("Failed to write data file: " + filepath.string()).c_str());
     }
+    m_dirty = false;
 }
 
 void VertexCluster::load() {
@@ -148,4 +153,5 @@ void VertexCluster::restoreBackup(const Vertex &vertex) {
     m_vertices.erase(vertex.getId());
     m_vertices.insert({newVertex->getId(), newVertex});
     delete oldVertex;
+    m_dirty = true;
 }
