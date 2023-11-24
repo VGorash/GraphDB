@@ -6,6 +6,7 @@
 #include "VertexRegistry.h"
 #include "VertexCluster.h"
 #include "VertexLocker.h"
+#include "ClusterLocker.h"
 #include "Vertex.h"
 
 #include <fstream>
@@ -110,8 +111,11 @@ void VertexRegistry::connectVerticesNoLock(const std::string &id1, const std::st
         throw std::exception("Cluster configuration error");
     }
 
+    auto dumpLocker1 = ClusterLocker(cluster1);
+    auto dumpLocker2 = ClusterLocker(cluster2);
+
     const Vertex vertex1 = cluster1->createBackup(id1);
-    const Vertex vertex2 = cluster1->createBackup(id2);
+    const Vertex vertex2 = cluster2->createBackup(id2);
 
     try {
         cluster1->addConnection(id1, connName, id2);
@@ -131,8 +135,12 @@ void VertexRegistry::disconnectVerticesNoLock(const std::string &id1, const std:
     if (!cluster1 || !cluster2) {
         throw std::exception("Cluster configuration error");
     }
+
+    auto dumpLocker1 = ClusterLocker(cluster1);
+    auto dumpLocker2 = ClusterLocker(cluster2);
+
     const Vertex vertex1 = cluster1->createBackup(id1);
-    const Vertex vertex2 = cluster1->createBackup(id2);
+    const Vertex vertex2 = cluster2->createBackup(id2);
 
     try {
         cluster1->removeConnection(id1, connName, id2);

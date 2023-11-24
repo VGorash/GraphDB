@@ -9,10 +9,13 @@
 #include <string>
 #include <vector>
 #include <future>
+#include <mutex>
 
 class Vertex;
 
 class VertexCluster {
+
+    friend class ClusterLocker;
 
 public:
 
@@ -44,6 +47,10 @@ public:
 
     void restoreBackup(const Vertex &vertex);
 
+    void lock();
+
+    void unlock();
+
 private:
 
     void dump();
@@ -57,6 +64,8 @@ private:
     std::pair<size_t, size_t> m_hashRange;
 
     std::thread m_timer;
+    std::mutex m_mutex;
+    int m_usages;
     bool m_terminating;
     bool m_dirty;
 };

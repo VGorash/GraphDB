@@ -5,6 +5,7 @@
 #include "VertexExceptions.h"
 #include "VertexCluster.h"
 #include "Vertex.h"
+#include "ClusterLocker.h"
 
 #include <string>
 #include <iostream>
@@ -19,13 +20,12 @@ VertexCluster::VertexCluster(std::pair<size_t, size_t> hashRange) : m_hashRange(
 
     m_terminating = false;
     m_dirty = false;
+    m_usages = 0;
 
     m_timer = std::thread([&]() {
         while (!m_terminating) {
             std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-            if (m_dirty) {
-                dump();
-            }
+            dump();
         }
     });
 }
@@ -49,6 +49,7 @@ Vertex *VertexCluster::getVertex(const std::string &id) {
 }
 
 Vertex *VertexCluster::addVertex(const std::string &id) {
+    auto locker = ClusterLocker(this);
     auto it = m_vertices.find(id);
     if (it != m_vertices.end()) {
         throw VertexOperationException(id);
@@ -63,6 +64,7 @@ Vertex *VertexCluster::addVertex(const std::string &id) {
 }
 
 void VertexCluster::deleteVertex(const std::string &id) {
+    auto locker = ClusterLocker(this);
     auto it = m_vertices.find(id);
     if (it == m_vertices.end()) {
         throw VertexOperationException(id);
@@ -75,12 +77,14 @@ void VertexCluster::deleteVertex(const std::string &id) {
 
 void VertexCluster::addConnection(const std::string &id1, const std::string &connName, const std::string &id2,
                                   bool reverse) {
+    auto locker = ClusterLocker(this);
     getVertex(id1)->connect(connName, id2, reverse);
     m_dirty = true;
 }
 
 void VertexCluster::removeConnection(const std::string &id1, const std::string &connName, const std::string &id2,
                                      bool reverse) {
+    auto locker = ClusterLocker(this);
     getVertex(id1)->disconnect(connName, id2, reverse);
     m_dirty = true;
 }
@@ -99,24 +103,46 @@ std::pair<size_t, size_t> VertexCluster::getHashRange() {
 }
 
 void VertexCluster::dump() {
-    fs::path data_dir("data");
-    if (!fs::exists(data_dir)) {
-        fs::create_directories(data_dir);
+    if (!m_dirty) {
+        return;
     }
-    fs::path filepath =
-            data_dir / (std::to_string(m_hashRange.first) + "-" + std::to_string(m_hashRange.second) + ".txt");
-    std::ofstream outFile(filepath);
-    if (!outFile.is_open()) {
-        throw std::exception(("Failed to open data file: " + filepath.string()).c_str());
+    while (true) {
+        if (m_usages > 0) {
+            continue;
+        }
+        m_mutex.lock();
+        if (m_usages > 0) {
+            m_mutex.unlock();
+            continue;
+        }
+        break;
     }
-    outFile << m_vertices.size() << "\n";
-    for (const auto &n: m_vertices) {
-        outFile << n.second->toString() << "\n";
+    try {
+        fs::path data_dir("data");
+        if (!fs::exists(data_dir)) {
+            fs::create_directories(data_dir);
+        }
+        fs::path filepath =
+                data_dir / (std::to_string(m_hashRange.first) + "-" + std::to_string(m_hashRange.second) + ".txt");
+        std::ofstream outFile(filepath);
+        if (!outFile.is_open()) {
+            throw std::exception(("Failed to open data file: " + filepath.string()).c_str());
+        }
+        outFile << m_vertices.size() << "\n";
+        for (const auto &n: m_vertices) {
+            outFile << n.second->toString() << "\n";
+        }
+        if (outFile.fail()) {
+            throw std::exception(("Failed to write data file: " + filepath.string()).c_str());
+        }
+        m_dirty = false;
+        m_mutex.unlock();
     }
-    if (outFile.fail()) {
-        throw std::exception(("Failed to write data file: " + filepath.string()).c_str());
+    catch (std::exception &) {
+        m_mutex.unlock();
+        throw;
     }
-    m_dirty = false;
+
 }
 
 void VertexCluster::load() {
@@ -148,10 +174,23 @@ Vertex VertexCluster::createBackup(const std::string &id) {
 }
 
 void VertexCluster::restoreBackup(const Vertex &vertex) {
+    auto locker = ClusterLocker(this);
     Vertex *oldVertex = getVertex(vertex.getId());
     auto *newVertex = new Vertex(vertex);
     m_vertices.erase(vertex.getId());
     m_vertices.insert({newVertex->getId(), newVertex});
     delete oldVertex;
     m_dirty = true;
+}
+
+void VertexCluster::lock() {
+    m_mutex.lock();
+    m_usages++;
+    m_mutex.unlock();
+}
+
+void VertexCluster::unlock() {
+    m_mutex.lock();
+    m_usages = m_usages < 1 ? 0 : m_usages - 1;
+    m_mutex.unlock();
 }
