@@ -11,9 +11,7 @@
 
 class Vertex {
 
-    friend class VertexCluster;
-
-    friend class VertexRegistry;
+    friend class VertexClusterImpl;
 
 public:
     const std::string &getId() const;
@@ -24,7 +22,9 @@ public:
 
     std::string toString() const;
 
-    void operator=(const Vertex &) = delete;
+    ~Vertex() = default;
+
+    Vertex(const Vertex &);
 
 private:
     void connect(const std::string &connName, const std::string &id, bool reverse = false);
@@ -34,10 +34,6 @@ private:
     void fillFromString(const std::string &inputString);
 
     explicit Vertex(std::string id);
-
-    Vertex(const Vertex &);
-
-    ~Vertex() = default;
 
 private:
     std::string m_id;

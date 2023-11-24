@@ -5,11 +5,11 @@
 #ifndef DB_CLUSTERLOCKER_H
 #define DB_CLUSTERLOCKER_H
 
-#include "VertexCluster.h"
+#include "../cluster/VertexClusterImpl.h"
 
 class ClusterLocker {
 public:
-    explicit ClusterLocker(VertexCluster *cluster) : m_cluster(cluster) {
+    explicit ClusterLocker(VertexClusterImpl *cluster) : m_cluster(cluster) {
         m_cluster->lock();
     }
 
@@ -18,7 +18,7 @@ public:
     }
 
 private:
-    VertexCluster *m_cluster;
+    VertexClusterImpl *m_cluster;
 };
 
 #endif //DB_CLUSTERLOCKER_H

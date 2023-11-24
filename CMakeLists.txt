@@ -6,9 +6,9 @@ set(CMAKE_CXX_STANDARD 17)
 add_executable(DB
         main.cpp
         Vertex.cpp
-        VertexCluster.cpp
+        cluster/VertexClusterImpl.cpp
         VertexRegistry.cpp
         utils.cpp
-        VertexLocker.cpp
-        ClusterLocker.h
+        lock/VertexLocker.cpp
+        lock/ClusterLocker.h
 )

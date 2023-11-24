@@ -4,9 +4,9 @@
 
 #include "VertexExceptions.h"
 #include "VertexRegistry.h"
-#include "VertexCluster.h"
-#include "VertexLocker.h"
-#include "ClusterLocker.h"
+#include "cluster/VertexClusterImpl.h"
+#include "lock/VertexLocker.h"
+#include "lock/ClusterLocker.h"
 #include "Vertex.h"
 
 #include <fstream>
@@ -26,7 +26,7 @@ VertexRegistry::VertexRegistry() {
         if (i == m_numClusters - 1) {
             upperBound = (size_t) -1;
         }
-        m_clusters.push_back(new VertexCluster({lowerBound, upperBound}));
+        m_clusters.push_back(new VertexClusterImpl({lowerBound, upperBound}));
         lowerBound = upperBound + 1;
     }
 }
@@ -42,18 +42,18 @@ VertexRegistry &VertexRegistry::getInstance() {
     return instance;
 }
 
-const Vertex *VertexRegistry::getVertex(const std::string &id) {
+Vertex VertexRegistry::getVertex(const std::string &id) {
     VertexLocker locker(id, m_mutex, m_lockedVertices);
-    return getVertexNoLock(id);
+    return *getVertexNoLock(id);
 }
 
-const Vertex *VertexRegistry::addVertex(const std::string &id) {
+Vertex VertexRegistry::addVertex(const std::string &id) {
     VertexLocker locker(id, m_mutex, m_lockedVertices);
     auto cluster = getClusterForId(id);
     if (!cluster) {
         throw std::exception("Cluster configuration error");
     }
-    return cluster->addVertex(id);
+    return *(cluster->addVertex(id));
 }
 
 void VertexRegistry::deleteVertex(const std::string &id) {
@@ -166,7 +166,7 @@ void VertexRegistry::loadConfig() {
     inFile >> m_numClusters;
 }
 
-VertexCluster *VertexRegistry::getClusterForId(const std::string &id) {
+VertexClusterImpl *VertexRegistry::getClusterForId(const std::string &id) {
     const size_t hash = m_hasher(id);
     for (auto c: m_clusters) {
         auto range = c->getHashRange();

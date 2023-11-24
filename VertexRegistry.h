@@ -11,7 +11,7 @@
 #include <unordered_set>
 #include <unordered_map>
 
-class VertexCluster;
+class VertexClusterImpl;
 
 class Vertex;
 
@@ -20,9 +20,9 @@ class VertexRegistry {
 public:
     static VertexRegistry &getInstance();
 
-    const Vertex *getVertex(const std::string &id);
+    Vertex getVertex(const std::string &id);
 
-    const Vertex *addVertex(const std::string &id);
+    Vertex addVertex(const std::string &id);
 
     void deleteVertex(const std::string &id);
 
@@ -43,7 +43,7 @@ private:
 
     void loadConfig();
 
-    VertexCluster *getClusterForId(const std::string &id);
+    VertexClusterImpl *getClusterForId(const std::string &id);
 
     const Vertex *getVertexNoLock(const std::string &id);
 
@@ -53,7 +53,7 @@ private:
 
 private:
     int m_numClusters{};
-    std::vector<VertexCluster *> m_clusters;
+    std::vector<VertexClusterImpl *> m_clusters;
     std::hash<std::string> m_hasher;
 
     std::unordered_set<std::string> m_lockedVertices;

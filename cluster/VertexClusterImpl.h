@@ -2,8 +2,8 @@
 // Created by goras on 10.11.2023.
 //
 
-#ifndef DB_VERTEXCLUSTER_H
-#define DB_VERTEXCLUSTER_H
+#ifndef DB_VERTEXCLUSTERIMPL_H
+#define DB_VERTEXCLUSTERIMPL_H
 
 #include <unordered_map>
 #include <string>
@@ -13,19 +13,19 @@
 
 class Vertex;
 
-class VertexCluster {
+class VertexClusterImpl {
 
     friend class ClusterLocker;
 
 public:
 
-    explicit VertexCluster(std::pair<size_t, size_t> hashRange);
+    explicit VertexClusterImpl(std::pair<size_t, size_t> hashRange);
 
-    VertexCluster(const VertexCluster &) = delete;
+    VertexClusterImpl(const VertexClusterImpl &) = delete;
 
-    void operator=(const VertexCluster &) = delete;
+    void operator=(const VertexClusterImpl &) = delete;
 
-    ~VertexCluster();
+    ~VertexClusterImpl();
 
     Vertex *getVertex(const std::string &id);
 
@@ -71,4 +71,4 @@ private:
 };
 
 
-#endif //DB_VERTEXCLUSTER_H
+#endif //DB_VERTEXCLUSTERIMPL_H
