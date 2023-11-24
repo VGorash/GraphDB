@@ -4,7 +4,7 @@
 
 #include "VertexExceptions.h"
 #include "VertexRegistry.h"
-#include "cluster/VertexClusterImpl.h"
+#include "cluster/LocalVertexCluster.h"
 #include "lock/VertexLocker.h"
 #include "lock/ClusterLocker.h"
 #include "Vertex.h"
@@ -26,7 +26,7 @@ VertexRegistry::VertexRegistry() {
         if (i == m_numClusters - 1) {
             upperBound = (size_t) -1;
         }
-        m_clusters.push_back(new VertexClusterImpl({lowerBound, upperBound}));
+        m_clusters.push_back(new LocalVertexCluster({lowerBound, upperBound}));
         lowerBound = upperBound + 1;
     }
 }
@@ -44,7 +44,7 @@ VertexRegistry &VertexRegistry::getInstance() {
 
 Vertex VertexRegistry::getVertex(const std::string &id) {
     VertexLocker locker(id, m_mutex, m_lockedVertices);
-    return *getVertexNoLock(id);
+    return getVertexNoLock(id);
 }
 
 Vertex VertexRegistry::addVertex(const std::string &id) {
@@ -53,7 +53,7 @@ Vertex VertexRegistry::addVertex(const std::string &id) {
     if (!cluster) {
         throw std::exception("Cluster configuration error");
     }
-    return *(cluster->addVertex(id));
+    return cluster->addVertex(id);
 }
 
 void VertexRegistry::deleteVertex(const std::string &id) {
@@ -62,11 +62,11 @@ void VertexRegistry::deleteVertex(const std::string &id) {
     if (!cluster) {
         throw std::exception("Cluster configuration error");
     }
-    const Vertex *vertex = getVertexNoLock(id);
-    for (const auto &c: std::set<std::pair<std::string, std::string>>(vertex->getOutputConnections())) {
+    const Vertex vertex = getVertexNoLock(id);
+    for (const auto &c: std::set<std::pair<std::string, std::string>>(vertex.getOutputConnections())) {
         disconnectVerticesNoLock(id, c.first, c.second);
     }
-    for (const auto &c: std::set<std::pair<std::string, std::string>>(vertex->getInputConnections())) {
+    for (const auto &c: std::set<std::pair<std::string, std::string>>(vertex.getInputConnections())) {
         disconnectVerticesNoLock(c.second, c.first, id);
     }
     cluster->deleteVertex(id);
@@ -74,16 +74,26 @@ void VertexRegistry::deleteVertex(const std::string &id) {
 
 void
 VertexRegistry::connectVertices(const std::string &id1, const std::string &connName, const std::string &id2) {
-    VertexLocker locker1(id1, m_mutex, m_lockedVertices);
-    VertexLocker locker2(id2, m_mutex, m_lockedVertices);
-    connectVerticesNoLock(id1, connName, id2);
+    if (id1 != id2) {
+        VertexLocker locker1(id1, m_mutex, m_lockedVertices);
+        VertexLocker locker2(id2, m_mutex, m_lockedVertices);
+        connectVerticesNoLock(id1, connName, id2);
+    } else {
+        VertexLocker locker1(id1, m_mutex, m_lockedVertices);
+        connectVerticesNoLock(id1, connName, id1);
+    }
 }
 
 void
 VertexRegistry::disconnectVertices(const std::string &id1, const std::string &connName, const std::string &id2) {
-    VertexLocker locker1(id1, m_mutex, m_lockedVertices);
-    VertexLocker locker2(id2, m_mutex, m_lockedVertices);
-    disconnectVerticesNoLock(id1, connName, id2);
+    if (id1 != id2) {
+        VertexLocker locker1(id1, m_mutex, m_lockedVertices);
+        VertexLocker locker2(id2, m_mutex, m_lockedVertices);
+        disconnectVerticesNoLock(id1, connName, id2);
+    } else {
+        VertexLocker locker1(id1, m_mutex, m_lockedVertices);
+        disconnectVerticesNoLock(id1, connName, id1);
+    }
 }
 
 std::vector<std::string> VertexRegistry::getAllIds() {
@@ -95,7 +105,7 @@ std::vector<std::string> VertexRegistry::getAllIds() {
     return result;
 }
 
-const Vertex *VertexRegistry::getVertexNoLock(const std::string &id) {
+Vertex VertexRegistry::getVertexNoLock(const std::string &id) {
     auto cluster = getClusterForId(id);
     if (!cluster) {
         throw std::exception("Cluster configuration error");
@@ -118,7 +128,7 @@ void VertexRegistry::connectVerticesNoLock(const std::string &id1, const std::st
     const Vertex vertex2 = cluster2->createBackup(id2);
 
     try {
-        cluster1->addConnection(id1, connName, id2);
+        cluster1->addConnection(id1, connName, id2, false);
         cluster2->addConnection(id2, connName, id1, true);
     }
     catch (std::exception &) {
@@ -143,7 +153,7 @@ void VertexRegistry::disconnectVerticesNoLock(const std::string &id1, const std:
     const Vertex vertex2 = cluster2->createBackup(id2);
 
     try {
-        cluster1->removeConnection(id1, connName, id2);
+        cluster1->removeConnection(id1, connName, id2, false);
         cluster2->removeConnection(id2, connName, id1, true);
     }
     catch (std::exception &) {
@@ -166,7 +176,7 @@ void VertexRegistry::loadConfig() {
     inFile >> m_numClusters;
 }
 
-VertexClusterImpl *VertexRegistry::getClusterForId(const std::string &id) {
+VertexCluster *VertexRegistry::getClusterForId(const std::string &id) {
     const size_t hash = m_hasher(id);
     for (auto c: m_clusters) {
         auto range = c->getHashRange();

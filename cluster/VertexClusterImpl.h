@@ -15,10 +15,7 @@ class Vertex;
 
 class VertexClusterImpl {
 
-    friend class ClusterLocker;
-
 public:
-
     explicit VertexClusterImpl(std::pair<size_t, size_t> hashRange);
 
     VertexClusterImpl(const VertexClusterImpl &) = delete;
