@@ -2,10 +2,10 @@
 // Created by goras on 10.11.2023.
 //
 
-#include "../VertexExceptions.h"
+#include "../registry/VertexExceptions.h"
 #include "VertexClusterImpl.h"
-#include "../Vertex.h"
-#include "../lock/ClusterLocker.h"
+#include "../registry/Vertex.h"
+#include "../registry/lock/ClusterLocker.h"
 
 #include <string>
 #include <iostream>

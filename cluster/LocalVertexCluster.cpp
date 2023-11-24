@@ -3,7 +3,7 @@
 //
 
 #include "LocalVertexCluster.h"
-#include "../Vertex.h"
+#include "../registry/Vertex.h"
 
 LocalVertexCluster::LocalVertexCluster(std::pair<size_t, size_t> hashRange) {
     m_impl = new VertexClusterImpl(hashRange);

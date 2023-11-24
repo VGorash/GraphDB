@@ -4,7 +4,7 @@
 
 #include "VertexExceptions.h"
 #include "VertexRegistry.h"
-#include "cluster/LocalVertexCluster.h"
+#include "../cluster/LocalVertexCluster.h"
 #include "lock/VertexLocker.h"
 #include "lock/ClusterLocker.h"
 #include "Vertex.h"
