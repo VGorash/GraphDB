@@ -2,7 +2,7 @@
 // Created by goras on 10.11.2023.
 //
 
-#include "utils.h"
+#include "../utils/string_utils.h"
 #include "VertexExceptions.h"
 #include "Vertex.h"
 

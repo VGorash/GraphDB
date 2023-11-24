@@ -1,7 +1,7 @@
-#include "VertexRegistry.h"
-#include "Vertex.h"
-#include "utils.h"
-#include "VertexExceptions.h"
+#include "../registry/VertexRegistry.h"
+#include "../registry/Vertex.h"
+#include "../registry/VertexExceptions.h"
+#include "../utils/string_utils.h"
 #include <regex>
 
 bool check_id(const std::string &id) {
