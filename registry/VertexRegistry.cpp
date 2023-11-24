@@ -6,6 +6,7 @@
 #include "VertexRegistry.h"
 #include "../cluster/LocalVertexCluster.h"
 #include "lock/VertexLocker.h"
+#include "lock/DoubleVertexLocker.h"
 #include "lock/ClusterLocker.h"
 #include "Vertex.h"
 
@@ -74,26 +75,14 @@ void VertexRegistry::deleteVertex(const std::string &id) {
 
 void
 VertexRegistry::connectVertices(const std::string &id1, const std::string &connName, const std::string &id2) {
-    if (id1 != id2) {
-        VertexLocker locker1(id1, m_mutex, m_lockedVertices);
-        VertexLocker locker2(id2, m_mutex, m_lockedVertices);
-        connectVerticesNoLock(id1, connName, id2);
-    } else {
-        VertexLocker locker1(id1, m_mutex, m_lockedVertices);
-        connectVerticesNoLock(id1, connName, id1);
-    }
+    DoubleVertexLocker locker(id1, id2, m_mutex, m_lockedVertices);
+    connectVerticesNoLock(id1, connName, id2);
 }
 
 void
 VertexRegistry::disconnectVertices(const std::string &id1, const std::string &connName, const std::string &id2) {
-    if (id1 != id2) {
-        VertexLocker locker1(id1, m_mutex, m_lockedVertices);
-        VertexLocker locker2(id2, m_mutex, m_lockedVertices);
-        disconnectVerticesNoLock(id1, connName, id2);
-    } else {
-        VertexLocker locker1(id1, m_mutex, m_lockedVertices);
-        disconnectVerticesNoLock(id1, connName, id1);
-    }
+    DoubleVertexLocker locker(id1, id2, m_mutex, m_lockedVertices);
+    disconnectVerticesNoLock(id1, connName, id2);
 }
 
 std::vector<std::string> VertexRegistry::getAllIds() {

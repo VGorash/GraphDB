@@ -19,6 +19,7 @@ add_library(registry STATIC
         registry/lock/VertexLocker.cpp
 
         utils/string_utils.cpp
+        registry/lock/DoubleVertexLocker.cpp
 )
 
 target_link_libraries(registry PRIVATE cluster)
