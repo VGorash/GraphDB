@@ -1,6 +1,6 @@
 #include "../registry/VertexRegistry.h"
-#include "../registry/Vertex.h"
-#include "../registry/VertexExceptions.h"
+#include "../vertex/Vertex.h"
+#include "../vertex/VertexExceptions.h"
 #include "../utils/string_utils.h"
 #include <regex>
 

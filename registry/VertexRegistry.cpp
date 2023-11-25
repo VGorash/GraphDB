@@ -2,17 +2,16 @@
 // Created by goras on 10.11.2023.
 //
 
-#include "VertexExceptions.h"
-#include "VertexRegistry.h"
+#include "../vertex/VertexExceptions.h"
+#include "../vertex/Vertex.h"
 #include "../cluster/LocalVertexCluster.h"
 #include "lock/VertexLocker.h"
 #include "lock/DoubleVertexLocker.h"
 #include "lock/ClusterLocker.h"
-#include "Vertex.h"
+#include "VertexRegistry.h"
 
 #include <fstream>
 #include <filesystem>
-#include <future>
 
 namespace fs = std::filesystem;
 
