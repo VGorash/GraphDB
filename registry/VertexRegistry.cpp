@@ -159,7 +159,7 @@ void VertexRegistry::loadConfig() {
     inFile >> m_numClusters;
 }
 
-VertexCluster *VertexRegistry::getClusterForId(const std::string &id) {
+VertexStorage *VertexRegistry::getClusterForId(const std::string &id) {
     const size_t hash = m_hasher(id);
     for (auto c: m_clusters) {
         auto range = c->getHashRange();

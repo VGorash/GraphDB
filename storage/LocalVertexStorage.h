@@ -2,18 +2,18 @@
 // Created by goras on 24.11.2023.
 //
 
-#ifndef DB_LOCALVERTEXCLUSTER_H
-#define DB_LOCALVERTEXCLUSTER_H
+#ifndef DB_LOCALVERTEXSTORAGE_H
+#define DB_LOCALVERTEXSTORAGE_H
 
 
-#include "VertexCluster.h"
-#include "VertexClusterImpl.h"
+#include "VertexStorage.h"
+#include "VertexStorageImpl.h"
 
-class LocalVertexCluster : public VertexCluster {
+class LocalVertexStorage : public VertexStorage {
 public:
-    explicit LocalVertexCluster(std::pair<size_t, size_t> hashRange);
+    explicit LocalVertexStorage(std::pair<size_t, size_t> hashRange);
 
-    ~LocalVertexCluster() override;
+    ~LocalVertexStorage() override;
 
     Vertex getVertex(const std::string &id) override;
 
@@ -40,8 +40,8 @@ public:
     void unlock() override;
 
 private:
-    VertexClusterImpl *m_impl;
+    VertexStorageImpl *m_impl;
 };
 
 
-#endif //DB_LOCALVERTEXCLUSTER_H
+#endif //DB_LOCALVERTEXSTORAGE_H

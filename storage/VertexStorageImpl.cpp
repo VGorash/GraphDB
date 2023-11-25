@@ -5,7 +5,7 @@
 #include "../vertex/VertexExceptions.h"
 #include "../vertex/Vertex.h"
 #include "../registry/lock/ClusterLocker.h"
-#include "VertexClusterImpl.h"
+#include "VertexStorageImpl.h"
 
 #include <string>
 #include <iostream>
@@ -15,7 +15,7 @@
 
 namespace fs = std::filesystem;
 
-VertexClusterImpl::VertexClusterImpl(std::pair<size_t, size_t> hashRange) : m_hashRange(hashRange) {
+VertexStorageImpl::VertexStorageImpl(std::pair<size_t, size_t> hashRange) : m_hashRange(hashRange) {
     load();
 
     m_terminating = false;
@@ -30,7 +30,7 @@ VertexClusterImpl::VertexClusterImpl(std::pair<size_t, size_t> hashRange) : m_ha
     });
 }
 
-VertexClusterImpl::~VertexClusterImpl() {
+VertexStorageImpl::~VertexStorageImpl() {
     m_terminating = true;
     m_timer.join();
 
@@ -40,7 +40,7 @@ VertexClusterImpl::~VertexClusterImpl() {
     }
 }
 
-Vertex *VertexClusterImpl::getVertex(const std::string &id) {
+Vertex *VertexStorageImpl::getVertex(const std::string &id) {
     auto it = m_vertices.find(id);
     if (it == m_vertices.end()) {
         throw VertexOperationException(id, VertexErrorCode::VertexNotFound);
@@ -48,7 +48,7 @@ Vertex *VertexClusterImpl::getVertex(const std::string &id) {
     return m_vertices[id];
 }
 
-Vertex *VertexClusterImpl::addVertex(const std::string &id) {
+Vertex *VertexStorageImpl::addVertex(const std::string &id) {
     auto locker = ClusterLocker(this);
     auto it = m_vertices.find(id);
     if (it != m_vertices.end()) {
@@ -63,7 +63,7 @@ Vertex *VertexClusterImpl::addVertex(const std::string &id) {
     return vertex;
 }
 
-void VertexClusterImpl::deleteVertex(const std::string &id) {
+void VertexStorageImpl::deleteVertex(const std::string &id) {
     auto locker = ClusterLocker(this);
     auto it = m_vertices.find(id);
     if (it == m_vertices.end()) {
@@ -75,21 +75,21 @@ void VertexClusterImpl::deleteVertex(const std::string &id) {
     m_dirty = true;
 }
 
-void VertexClusterImpl::addConnection(const std::string &id1, const std::string &connName, const std::string &id2,
+void VertexStorageImpl::addConnection(const std::string &id1, const std::string &connName, const std::string &id2,
                                       bool reverse) {
     auto locker = ClusterLocker(this);
     getVertex(id1)->connect(connName, id2, reverse);
     m_dirty = true;
 }
 
-void VertexClusterImpl::removeConnection(const std::string &id1, const std::string &connName, const std::string &id2,
+void VertexStorageImpl::removeConnection(const std::string &id1, const std::string &connName, const std::string &id2,
                                          bool reverse) {
     auto locker = ClusterLocker(this);
     getVertex(id1)->disconnect(connName, id2, reverse);
     m_dirty = true;
 }
 
-std::vector<std::string> VertexClusterImpl::getAllIds() {
+std::vector<std::string> VertexStorageImpl::getAllIds() {
     std::vector<std::string> result;
     result.reserve(m_vertices.size());
     for (const auto &n: m_vertices) {
@@ -98,11 +98,11 @@ std::vector<std::string> VertexClusterImpl::getAllIds() {
     return result;
 }
 
-std::pair<size_t, size_t> VertexClusterImpl::getHashRange() {
+std::pair<size_t, size_t> VertexStorageImpl::getHashRange() {
     return m_hashRange;
 }
 
-void VertexClusterImpl::dump() {
+void VertexStorageImpl::dump() {
     if (!m_dirty) {
         return;
     }
@@ -145,7 +145,7 @@ void VertexClusterImpl::dump() {
 
 }
 
-void VertexClusterImpl::load() {
+void VertexStorageImpl::load() {
     fs::path data_dir("data");
     if (!fs::exists(data_dir)) {
         fs::create_directories(data_dir);
@@ -169,11 +169,11 @@ void VertexClusterImpl::load() {
     }
 }
 
-Vertex VertexClusterImpl::createBackup(const std::string &id) {
+Vertex VertexStorageImpl::createBackup(const std::string &id) {
     return {Vertex(*getVertex(id))};
 }
 
-void VertexClusterImpl::restoreBackup(const Vertex &vertex) {
+void VertexStorageImpl::restoreBackup(const Vertex &vertex) {
     auto locker = ClusterLocker(this);
     Vertex *oldVertex = getVertex(vertex.getId());
     auto *newVertex = new Vertex(vertex);
@@ -183,13 +183,13 @@ void VertexClusterImpl::restoreBackup(const Vertex &vertex) {
     m_dirty = true;
 }
 
-void VertexClusterImpl::lock() {
+void VertexStorageImpl::lock() {
     m_mutex.lock();
     m_usages++;
     m_mutex.unlock();
 }
 
-void VertexClusterImpl::unlock() {
+void VertexStorageImpl::unlock() {
     m_mutex.lock();
     m_usages = m_usages < 1 ? 0 : m_usages - 1;
     m_mutex.unlock();

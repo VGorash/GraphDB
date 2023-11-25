@@ -2,15 +2,15 @@
 // Created by goras on 24.11.2023.
 //
 
-#ifndef DB_VERTEXCLUSTER_H
-#define DB_VERTEXCLUSTER_H
+#ifndef DB_VERTEXSTORAGE_H
+#define DB_VERTEXSTORAGE_H
 
 #include <string>
 #include <vector>
 
 class Vertex;
 
-class VertexCluster {
+class VertexStorage {
 public:
     virtual Vertex getVertex(const std::string &id) = 0;
 
@@ -36,7 +36,7 @@ public:
 
     virtual void unlock() = 0;
 
-    virtual ~VertexCluster() = default;
+    virtual ~VertexStorage() = default;
 };
 
-#endif //DB_VERTEXCLUSTER_H
+#endif //DB_VERTEXSTORAGE_H

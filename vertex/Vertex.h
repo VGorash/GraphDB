@@ -11,7 +11,7 @@
 
 class Vertex {
 
-    friend class VertexClusterImpl;
+    friend class VertexStorageImpl;
 
 public:
     const std::string &getId() const;

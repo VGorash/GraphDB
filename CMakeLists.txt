@@ -8,7 +8,7 @@ set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 add_subdirectory(utils)
 add_subdirectory(vertex)
-add_subdirectory(cluster)
+add_subdirectory(storage)
 add_subdirectory(registry)
 add_subdirectory(database)
 add_subdirectory(node)
