@@ -12,6 +12,7 @@
 
 #include <fstream>
 #include <filesystem>
+#include <future>
 
 namespace fs = std::filesystem;
 
@@ -33,8 +34,13 @@ VertexRegistry::VertexRegistry() {
 }
 
 VertexRegistry::~VertexRegistry() {
+    std::vector<std::thread> threads;
+    threads.reserve(m_clusters.size());
     for (auto c: m_clusters) {
-        delete c;
+        threads.emplace_back([=]() { delete c; });
+    }
+    for (std::thread &t: threads) {
+        t.join();
     }
 }
 
