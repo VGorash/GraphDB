@@ -64,11 +64,8 @@ void VertexRegistry::deleteVertex(const std::string &id) {
         throw std::exception("Cluster configuration error");
     }
     const Vertex vertex = getVertexNoLock(id);
-    for (const auto &c: std::set<std::pair<std::string, std::string>>(vertex.getOutputConnections())) {
-        disconnectVerticesNoLock(id, c.first, c.second);
-    }
-    for (const auto &c: std::set<std::pair<std::string, std::string>>(vertex.getInputConnections())) {
-        disconnectVerticesNoLock(c.second, c.first, id);
+    if (!vertex.getInputConnections().empty() || !vertex.getOutputConnections().empty()) {
+        throw VertexOperationException(vertex.getId(), VertexErrorCode::VertexHasConnections);
     }
     cluster->deleteVertex(id);
 }
@@ -76,34 +73,7 @@ void VertexRegistry::deleteVertex(const std::string &id) {
 void
 VertexRegistry::connectVertices(const std::string &id1, const std::string &connName, const std::string &id2) {
     DoubleVertexLocker locker(id1, id2, m_mutex, m_lockedVertices);
-    connectVerticesNoLock(id1, connName, id2);
-}
 
-void
-VertexRegistry::disconnectVertices(const std::string &id1, const std::string &connName, const std::string &id2) {
-    DoubleVertexLocker locker(id1, id2, m_mutex, m_lockedVertices);
-    disconnectVerticesNoLock(id1, connName, id2);
-}
-
-std::vector<std::string> VertexRegistry::getAllIds() {
-    std::vector<std::string> result;
-    for (auto c: m_clusters) {
-        auto ids = c->getAllIds();
-        result.insert(result.end(), ids.begin(), ids.end());
-    }
-    return result;
-}
-
-Vertex VertexRegistry::getVertexNoLock(const std::string &id) {
-    auto cluster = getClusterForId(id);
-    if (!cluster) {
-        throw std::exception("Cluster configuration error");
-    }
-    return cluster->getVertex(id);
-}
-
-void VertexRegistry::connectVerticesNoLock(const std::string &id1, const std::string &connName,
-                                           const std::string &id2) {
     auto cluster1 = getClusterForId(id1);
     auto cluster2 = getClusterForId(id2);
     if (!cluster1 || !cluster2) {
@@ -127,8 +97,10 @@ void VertexRegistry::connectVerticesNoLock(const std::string &id1, const std::st
     }
 }
 
-void VertexRegistry::disconnectVerticesNoLock(const std::string &id1, const std::string &connName,
-                                              const std::string &id2) {
+void
+VertexRegistry::disconnectVertices(const std::string &id1, const std::string &connName, const std::string &id2) {
+    DoubleVertexLocker locker(id1, id2, m_mutex, m_lockedVertices);
+
     auto cluster1 = getClusterForId(id1);
     auto cluster2 = getClusterForId(id2);
     if (!cluster1 || !cluster2) {
@@ -150,6 +122,23 @@ void VertexRegistry::disconnectVerticesNoLock(const std::string &id1, const std:
         cluster2->restoreBackup(vertex2);
         throw;
     }
+}
+
+std::vector<std::string> VertexRegistry::getAllIds() {
+    std::vector<std::string> result;
+    for (auto c: m_clusters) {
+        auto ids = c->getAllIds();
+        result.insert(result.end(), ids.begin(), ids.end());
+    }
+    return result;
+}
+
+Vertex VertexRegistry::getVertexNoLock(const std::string &id) {
+    auto cluster = getClusterForId(id);
+    if (!cluster) {
+        throw std::exception("Cluster configuration error");
+    }
+    return cluster->getVertex(id);
 }
 
 void VertexRegistry::loadConfig() {

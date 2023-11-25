@@ -43,7 +43,7 @@ VertexClusterImpl::~VertexClusterImpl() {
 Vertex *VertexClusterImpl::getVertex(const std::string &id) {
     auto it = m_vertices.find(id);
     if (it == m_vertices.end()) {
-        throw VertexOperationException(id);
+        throw VertexOperationException(id, VertexErrorCode::VertexNotFound);
     }
     return m_vertices[id];
 }
@@ -52,7 +52,7 @@ Vertex *VertexClusterImpl::addVertex(const std::string &id) {
     auto locker = ClusterLocker(this);
     auto it = m_vertices.find(id);
     if (it != m_vertices.end()) {
-        throw VertexOperationException(id);
+        throw VertexOperationException(id, VertexErrorCode::VertexAlreadyExists);
     }
     if (m_hasher(id) < m_hashRange.first || m_hasher(id) > m_hashRange.second) {
         throw std::exception("Id is not in hash range");
@@ -67,7 +67,7 @@ void VertexClusterImpl::deleteVertex(const std::string &id) {
     auto locker = ClusterLocker(this);
     auto it = m_vertices.find(id);
     if (it == m_vertices.end()) {
-        throw VertexOperationException(id);
+        throw VertexOperationException(id, VertexErrorCode::VertexNotFound);
     }
     Vertex *temp = m_vertices[id];
     m_vertices.erase(id);

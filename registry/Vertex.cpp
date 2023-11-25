@@ -32,7 +32,7 @@ void Vertex::connect(const std::string &connName, const std::string &id, bool re
     std::set<std::pair<std::string, std::string>> &conns = reverse ? m_inputConnections : m_outputConnections;
 
     if (conns.find({connName, id}) != conns.end()) {
-        throw ConnectionOperationException(m_id, id, connName, reverse);
+        throw ConnectionOperationException(m_id, id, connName, reverse, ConnectionErrorCode::ConnectionAlreadyExists);
     }
     conns.insert({connName, id});
 }
@@ -41,7 +41,7 @@ void Vertex::disconnect(const std::string &connName, const std::string &id, bool
     std::set<std::pair<std::string, std::string>> &conns = reverse ? m_inputConnections : m_outputConnections;
 
     if (conns.find({connName, id}) == conns.end()) {
-        throw ConnectionOperationException(m_id, id, connName, reverse);
+        throw ConnectionOperationException(m_id, id, connName, reverse, ConnectionErrorCode::ConnectionNotFound);
     }
     conns.erase({connName, id});
 }

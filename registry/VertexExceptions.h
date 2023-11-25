@@ -8,10 +8,24 @@
 #include <stdexcept>
 #include <utility>
 
+enum VertexErrorCode {
+    VertexAlreadyExists,
+    VertexNotFound,
+    VertexHasConnections
+
+};
+
+enum ConnectionErrorCode {
+    ConnectionAlreadyExists,
+    ConnectionNotFound
+};
+
 class VertexOperationException : public std::exception {
 public:
-    explicit VertexOperationException(std::string vertexId) : std::exception(), vertexId(std::move(vertexId)) {};
+    explicit VertexOperationException(std::string vertexId, VertexErrorCode code)
+            : std::exception(), vertexId(std::move(vertexId)), code(code) {};
     std::string vertexId;
+    VertexErrorCode code;
 };
 
 class ConnectionOperationException : public std::exception {
@@ -19,12 +33,14 @@ public:
     ConnectionOperationException(std::string vertexId1,
                                  std::string vertexId2,
                                  std::string connName,
-                                 bool reverse) : std::exception(),
+                                 bool reverse,
+                                 ConnectionErrorCode code) : std::exception(),
                                                  vertexId1(std::move(vertexId1)),
                                                  vertexId2(std::move(vertexId2)),
                                                  connName(std::move(connName)),
-                                                 reverse(reverse) {};
+                                                             reverse(reverse), code(code) {};
 
+    ConnectionErrorCode code;
     std::string vertexId1;
     std::string vertexId2;
     std::string connName;

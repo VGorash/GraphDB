@@ -47,10 +47,6 @@ private:
 
     Vertex getVertexNoLock(const std::string &id);
 
-    void connectVerticesNoLock(const std::string &id1, const std::string &connName, const std::string &id2);
-
-    void disconnectVerticesNoLock(const std::string &id1, const std::string &connName, const std::string &id2);
-
 private:
     int m_numClusters{};
     std::vector<VertexCluster *> m_clusters;
