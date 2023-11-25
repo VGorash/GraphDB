@@ -62,9 +62,9 @@ private:
 
     std::thread m_timer;
     std::mutex m_mutex;
-    int m_usages;
-    bool m_terminating;
-    bool m_dirty;
+    volatile int m_usages;
+    volatile bool m_terminating;
+    volatile bool m_dirty;
 };
 
 

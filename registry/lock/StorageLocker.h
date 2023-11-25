@@ -6,13 +6,13 @@
 #define DB_CLUSTERLOCKER_H
 
 template<class T>
-class ClusterLocker {
+class StorageLocker {
 public:
-    explicit ClusterLocker(T *cluster) : m_cluster(cluster) {
+    explicit StorageLocker(T *cluster) : m_cluster(cluster) {
         m_cluster->lock();
     }
 
-    ~ClusterLocker() {
+    ~StorageLocker() {
         m_cluster->unlock();
     }
 

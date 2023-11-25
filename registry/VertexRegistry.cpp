@@ -4,10 +4,10 @@
 
 #include "../vertex/VertexExceptions.h"
 #include "../vertex/Vertex.h"
-#include "../cluster/LocalVertexCluster.h"
+#include "../storage/LocalVertexStorage.h"
 #include "lock/VertexLocker.h"
 #include "lock/DoubleVertexLocker.h"
-#include "lock/ClusterLocker.h"
+#include "lock/StorageLocker.h"
 #include "VertexRegistry.h"
 
 #include <fstream>
@@ -27,7 +27,7 @@ VertexRegistry::VertexRegistry() {
         if (i == m_numClusters - 1) {
             upperBound = (size_t) -1;
         }
-        m_clusters.push_back(new LocalVertexCluster({lowerBound, upperBound}));
+        m_clusters.push_back(new LocalVertexStorage({lowerBound, upperBound}));
         lowerBound = upperBound + 1;
     }
 }
@@ -85,8 +85,8 @@ VertexRegistry::connectVertices(const std::string &id1, const std::string &connN
         throw std::exception("Cluster configuration error");
     }
 
-    auto dumpLocker1 = ClusterLocker(cluster1);
-    auto dumpLocker2 = ClusterLocker(cluster2);
+    auto dumpLocker1 = StorageLocker(cluster1);
+    auto dumpLocker2 = StorageLocker(cluster2);
 
     const Vertex vertex1 = cluster1->createBackup(id1);
     const Vertex vertex2 = cluster2->createBackup(id2);
@@ -112,8 +112,8 @@ VertexRegistry::disconnectVertices(const std::string &id1, const std::string &co
         throw std::exception("Cluster configuration error");
     }
 
-    auto dumpLocker1 = ClusterLocker(cluster1);
-    auto dumpLocker2 = ClusterLocker(cluster2);
+    auto dumpLocker1 = StorageLocker(cluster1);
+    auto dumpLocker2 = StorageLocker(cluster2);
 
     const Vertex vertex1 = cluster1->createBackup(id1);
     const Vertex vertex2 = cluster2->createBackup(id2);

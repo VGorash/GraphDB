@@ -4,7 +4,7 @@
 
 #include "../vertex/VertexExceptions.h"
 #include "../vertex/Vertex.h"
-#include "../registry/lock/ClusterLocker.h"
+#include "../registry/lock/StorageLocker.h"
 #include "VertexStorageImpl.h"
 
 #include <string>
@@ -22,6 +22,7 @@ VertexStorageImpl::VertexStorageImpl(std::pair<size_t, size_t> hashRange) : m_ha
     m_dirty = false;
     m_usages = 0;
 
+    // TODO notify
     m_timer = std::thread([&]() {
         while (!m_terminating) {
             std::this_thread::sleep_for(std::chrono::milliseconds(1000));
@@ -49,7 +50,7 @@ Vertex *VertexStorageImpl::getVertex(const std::string &id) {
 }
 
 Vertex *VertexStorageImpl::addVertex(const std::string &id) {
-    auto locker = ClusterLocker(this);
+    auto locker = StorageLocker(this);
     auto it = m_vertices.find(id);
     if (it != m_vertices.end()) {
         throw VertexOperationException(id, VertexErrorCode::VertexAlreadyExists);
@@ -64,7 +65,7 @@ Vertex *VertexStorageImpl::addVertex(const std::string &id) {
 }
 
 void VertexStorageImpl::deleteVertex(const std::string &id) {
-    auto locker = ClusterLocker(this);
+    auto locker = StorageLocker(this);
     auto it = m_vertices.find(id);
     if (it == m_vertices.end()) {
         throw VertexOperationException(id, VertexErrorCode::VertexNotFound);
@@ -77,14 +78,14 @@ void VertexStorageImpl::deleteVertex(const std::string &id) {
 
 void VertexStorageImpl::addConnection(const std::string &id1, const std::string &connName, const std::string &id2,
                                       bool reverse) {
-    auto locker = ClusterLocker(this);
+    auto locker = StorageLocker(this);
     getVertex(id1)->connect(connName, id2, reverse);
     m_dirty = true;
 }
 
 void VertexStorageImpl::removeConnection(const std::string &id1, const std::string &connName, const std::string &id2,
                                          bool reverse) {
-    auto locker = ClusterLocker(this);
+    auto locker = StorageLocker(this);
     getVertex(id1)->disconnect(connName, id2, reverse);
     m_dirty = true;
 }
@@ -174,7 +175,7 @@ Vertex VertexStorageImpl::createBackup(const std::string &id) {
 }
 
 void VertexStorageImpl::restoreBackup(const Vertex &vertex) {
-    auto locker = ClusterLocker(this);
+    auto locker = StorageLocker(this);
     Vertex *oldVertex = getVertex(vertex.getId());
     auto *newVertex = new Vertex(vertex);
     m_vertices.erase(vertex.getId());
