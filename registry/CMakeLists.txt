@@ -5,4 +5,4 @@ add_library(registry STATIC
         lock/VertexLocker.cpp
         lock/DoubleVertexLocker.cpp
 )
-target_link_libraries(registry PRIVATE cluster)
+target_link_libraries(registry PRIVATE storage vertex)

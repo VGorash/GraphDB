@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.25)
 
-add_library(cluster STATIC
+add_library(storage STATIC
         VertexStorageImpl.cpp
         LocalVertexStorage.cpp
 )
-target_link_libraries(cluster PRIVATE vertex)
+target_link_libraries(storage PRIVATE vertex)

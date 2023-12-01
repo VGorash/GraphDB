@@ -83,3 +83,9 @@ void Vertex::fillFromString(const std::string &inputString) {
     }
 }
 
+Vertex Vertex::fromString(const std::string &inputString) {
+    Vertex vertex("");
+    vertex.fillFromString(inputString);
+    return vertex;
+}
+

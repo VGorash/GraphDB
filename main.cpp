@@ -6,87 +6,46 @@
 
 #include <iostream>
 #include <WinSock2.h>
-#include <WS2tcpip.h>
-#include <vector>
-#include <iostream>
+#include "utils/tcp_utils.h"
 
 #pragma comment(lib, "Ws2_32.lib")
 
+void connect(SOCKET ClientSock, sockaddr_in servInfo) {
+    int erStat = connect(ClientSock, (sockaddr *) &servInfo, sizeof(servInfo));
+
+    if (erStat != 0) {
+        closesocket(ClientSock);
+        throw std::exception("Cannot connect to server");
+    }
+}
+
 int main() {
-    WSADATA wsData;
-    int erStat = WSAStartup(MAKEWORD(2, 2), &wsData);
+    SOCKET ClientSock = createSocket();
+    sockaddr_in servInfo = prepareServerInfo("127.0.0.1", 26080);
+    connect(ClientSock, servInfo);
 
-    if (erStat != 0) {
-        throw std::exception("Error WinSock version initializaion ");
-    }
+    // The size of sending / receiving packet in bytes\
 
-    SOCKET ClientSock = socket(AF_INET, SOCK_STREAM, 0);
-    if (ClientSock == INVALID_SOCKET) {
-        closesocket(ClientSock);
-        WSACleanup();
-        throw std::exception("Error on socket creation");
-    }
-
-    in_addr ip_to_num{};
-    erStat = inet_pton(AF_INET, "127.0.0.1", &ip_to_num);
-    if (erStat <= 0) {
-        throw std::exception("Error in IP translation to special numeric format");
-    }
-
-    sockaddr_in servInfo{};
-    ZeroMemory(&servInfo, sizeof(servInfo));
-
-    servInfo.sin_family = AF_INET;
-    servInfo.sin_addr = ip_to_num;
-    servInfo.sin_port = htons(26080);
-
-    erStat = connect(ClientSock, (sockaddr *) &servInfo, sizeof(servInfo));
-
-    if (erStat != 0) {
-        std::cout << "Connection to Server is FAILED. Error # " << WSAGetLastError() << std::endl;
-        closesocket(ClientSock);
-        WSACleanup();
-        return 1;
-    }
-
-    std::vector<char> servBuff(1024), clientBuff(
-            1024);                            // Buffers for sending and receiving data
-    short packet_size = 0;                                                // The size of sending / receiving packet in bytes
+    std::string input;
 
     while (true) {
 
         std::cout << "Your (Client) message to Server: ";
-        fgets(clientBuff.data(), clientBuff.size(), stdin);
+        std::getline(std::cin, input);
 
-        // Check whether client like to stop chatting
-        if (clientBuff[0] == 'x' && clientBuff[1] == 'x' && clientBuff[2] == 'x') {
+        if (input == "xxx") {
             shutdown(ClientSock, SD_BOTH);
             closesocket(ClientSock);
             WSACleanup();
             return 0;
         }
 
-        packet_size = send(ClientSock, clientBuff.data(), clientBuff.size(), 0);
+        sendString(ClientSock, input);
+        auto reply = receiveString(ClientSock);
 
-        if (packet_size == SOCKET_ERROR) {
-            std::cout << "Can't send message to Server. Error # " << WSAGetLastError() << std::endl;
-            closesocket(ClientSock);
-            WSACleanup();
-            return 1;
-        }
-
-        packet_size = recv(ClientSock, servBuff.data(), servBuff.size(), 0);
-
-        if (packet_size == SOCKET_ERROR) {
-            std::cout << "Can't receive message from Server. Error # " << WSAGetLastError() << std::endl;
-            closesocket(ClientSock);
-            WSACleanup();
-            return 1;
-        } else
-            std::cout << "Server message: " << servBuff.data() << std::endl;
+        std::cout << reply;
 
     }
-
     closesocket(ClientSock);
     WSACleanup();
 

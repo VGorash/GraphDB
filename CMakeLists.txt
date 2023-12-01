@@ -14,3 +14,4 @@ add_subdirectory(database)
 add_subdirectory(node)
 
 add_executable(test main.cpp)
+target_link_libraries(test utils)

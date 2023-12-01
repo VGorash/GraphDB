@@ -14,6 +14,10 @@ class Vertex {
     friend class VertexStorageImpl;
 
 public:
+    ~Vertex() = default;
+
+    Vertex(const Vertex &);
+
     const std::string &getId() const;
 
     const std::set<std::pair<std::string, std::string>> &getOutputConnections() const;
@@ -22,9 +26,7 @@ public:
 
     std::string toString() const;
 
-    ~Vertex() = default;
-
-    Vertex(const Vertex &);
+    static Vertex fromString(const std::string &inputString);
 
 private:
     void connect(const std::string &connName, const std::string &id, bool reverse = false);
