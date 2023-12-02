@@ -11,6 +11,7 @@ add_subdirectory(vertex)
 add_subdirectory(storage)
 add_subdirectory(registry)
 add_subdirectory(database)
+add_subdirectory(server)
 add_subdirectory(node)
 
 add_executable(test main.cpp)

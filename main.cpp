@@ -30,10 +30,10 @@ int main() {
 
     while (true) {
 
-        std::cout << "Your (Client) message to Server: ";
+        std::cout << "> ";
         std::getline(std::cin, input);
 
-        if (input == "xxx") {
+        if (input == "exit") {
             shutdown(ClientSock, SD_BOTH);
             closesocket(ClientSock);
             WSACleanup();
@@ -43,7 +43,7 @@ int main() {
         sendString(ClientSock, input);
         auto reply = receiveString(ClientSock);
 
-        std::cout << reply;
+        std::cout << reply << std::endl;
 
     }
     closesocket(ClientSock);

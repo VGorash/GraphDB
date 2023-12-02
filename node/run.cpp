@@ -3,9 +3,9 @@
 //
 
 #include <iostream>
-#include "Server.h"
+#include "NodeServer.h"
 
 int main() {
-    auto server = Server("127.0.0.1", 26080);
+    auto server = NodeServer("127.0.0.1", 26080);
     server.start();
 }
