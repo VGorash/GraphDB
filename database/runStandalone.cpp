@@ -3,6 +3,7 @@
 #include "../vertex/VertexExceptions.h"
 #include "../utils/string_utils.h"
 #include <regex>
+#include <iostream>
 
 bool check_id(const std::string &id) {
     std::regex pattern("^[A-Za-z0-9_]+$");
@@ -152,7 +153,7 @@ void connectVertices(const std::vector<std::string> &args) {
     std::cout << " successfully created\n";
 }
 
-void disconnectVertexs(const std::vector<std::string> &args) {
+void disconnectVertices(const std::vector<std::string> &args) {
     if (!checkFourArgs(args)) {
         return;
     }
@@ -266,7 +267,7 @@ int main() {
         } else if (command == "connect") {
             connectVertices(parsed);
         } else if (command == "disconnect") {
-            disconnectVertexs(parsed);
+            disconnectVertices(parsed);
         } else if (command == "query") {
             query(parsed);
         } else if (command == "exit") {

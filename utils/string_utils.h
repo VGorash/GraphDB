@@ -5,7 +5,7 @@
 #ifndef DB_STRING_UTILS_H
 #define DB_STRING_UTILS_H
 
-#include <iostream>
+#include <string>
 #include <vector>
 
 std::string lowercase(std::string input);
