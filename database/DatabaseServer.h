@@ -11,6 +11,12 @@
 class DatabaseServer : public AbstractServer {
 public:
     DatabaseServer(const std::string &host, int port);
+
+private:
+    std::string processString(const std::string &command) override;
+
+private:
+    std::map<std::string, std::function<std::string(const std::vector<std::string> &)>> m_operations;
 };
 
 

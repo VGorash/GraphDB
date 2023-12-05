@@ -71,11 +71,3 @@ void AbstractServer::start() {
         }).detach();
     }
 }
-
-std::string AbstractServer::processString(const std::string &s) {
-    auto parsed = split(s);
-    if (m_operations.find(parsed[0]) != m_operations.end()) {
-        return m_operations[parsed[0]](parsed);
-    }
-    return m_fallbackOperation(parsed);
-}

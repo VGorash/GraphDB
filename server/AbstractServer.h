@@ -18,12 +18,8 @@ public:
 
     void start();
 
-private:
-    std::string processString(const std::string &command);
-
 protected:
-    std::map<std::string, std::function<std::string(const std::vector<std::string> &)>> m_operations;
-    std::function<std::string(const std::vector<std::string> &)> m_fallbackOperation;
+    virtual std::string processString(const std::string &command) = 0;
 
 private:
     SOCKET m_socket;

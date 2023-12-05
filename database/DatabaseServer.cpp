@@ -265,5 +265,12 @@ DatabaseServer::DatabaseServer(const std::string &host, int port) : AbstractServ
     m_operations.insert({"connect", connectVertices});
     m_operations.insert({"disconnect", disconnectVertices});
     m_operations.insert({"query", query});
-    m_fallbackOperation = fallback;
+}
+
+std::string DatabaseServer::processString(const std::string &command) {
+    auto parsed = split(command);
+    if (m_operations.find(parsed[0]) != m_operations.end()) {
+        return m_operations[parsed[0]](parsed);
+    }
+    return fallback(parsed);
 }
