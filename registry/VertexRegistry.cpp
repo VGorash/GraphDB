@@ -5,6 +5,7 @@
 #include "../vertex/VertexExceptions.h"
 #include "../vertex/Vertex.h"
 #include "../storage/LocalVertexStorage.h"
+#include "../storage/RemoteVertexStorage.h"
 #include "lock/VertexLocker.h"
 #include "lock/DoubleVertexLocker.h"
 #include "lock/StorageLocker.h"
@@ -20,16 +21,19 @@ VertexRegistry::VertexRegistry() {
 
     size_t clusterCapacity = ((size_t) -1) / m_numClusters;
 
-    m_clusters.reserve(m_numClusters);
-    size_t lowerBound = 0;
-    for (int i = 0; i < m_numClusters; i++) {
-        size_t upperBound = lowerBound + clusterCapacity - 1;
-        if (i == m_numClusters - 1) {
-            upperBound = (size_t) -1;
-        }
-        m_clusters.push_back(new LocalVertexStorage({lowerBound, upperBound}));
-        lowerBound = upperBound + 1;
-    }
+//    m_clusters.reserve(m_numClusters);
+//    size_t lowerBound = 0;
+//    for (int i = 0; i < m_numClusters; i++) {
+//        size_t upperBound = lowerBound + clusterCapacity - 1;
+//        if (i == m_numClusters - 1) {
+//            upperBound = (size_t) -1;
+//        }
+//        m_clusters.push_back(new LocalVertexStorage({lowerBound, upperBound}));
+//        lowerBound = upperBound + 1;
+//    }
+
+    m_clusters.push_back(new RemoteVertexStorage("127.0.0.1", 26080));
+
 }
 
 VertexRegistry::~VertexRegistry() {

@@ -10,15 +10,6 @@
 
 #pragma comment(lib, "Ws2_32.lib")
 
-void connect(SOCKET ClientSock, sockaddr_in servInfo) {
-    int erStat = connect(ClientSock, (sockaddr *) &servInfo, sizeof(servInfo));
-
-    if (erStat != 0) {
-        closesocket(ClientSock);
-        throw std::exception("Cannot connect to server");
-    }
-}
-
 int main(int argc, char *argv[]) {
     if (argc < 3) {
         std::cerr << "Hostname and port args are needed to start";

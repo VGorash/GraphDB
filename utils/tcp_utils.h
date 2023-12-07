@@ -11,6 +11,8 @@
 
 SOCKET createSocket();
 
+void connect(SOCKET ClientSock, sockaddr_in servInfo);
+
 sockaddr_in prepareServerInfo(const std::string &hostname, int port);
 
 void sendString(SOCKET socket, const std::string &string);

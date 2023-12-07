@@ -74,3 +74,12 @@ std::string receiveString(SOCKET socket) {
 
     return {buffer.begin(), buffer.end()};
 }
+
+void connect(SOCKET ClientSock, sockaddr_in servInfo) {
+    int erStat = connect(ClientSock, (sockaddr *) &servInfo, sizeof(servInfo));
+
+    if (erStat != 0) {
+        closesocket(ClientSock);
+        throw std::exception("Cannot connect to server");
+    }
+}

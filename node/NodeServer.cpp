@@ -10,14 +10,6 @@
 #include "../vertex/Vertex.h"
 #include "../vertex/VertexExceptions.h"
 
-std::string operation(const std::vector<std::string> &s) {
-    std::string result;
-    for (int i = 1; i < s.size(); i++) {
-        result += s[i] + " ";
-    }
-    return result;
-}
-
 void addVertex(const std::vector<std::string> &s, VertexStorageImpl *storage, std::stringstream &out) {
     Vertex *vertex = storage->addVertex(s[1]);
     out << Status::Success << " " << vertex->toString();
