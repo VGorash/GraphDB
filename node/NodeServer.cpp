@@ -73,8 +73,8 @@ std::string fallback(const std::vector<std::string> &s) {
     return "Command not found";
 }
 
-NodeServer::NodeServer(const std::string &host, int port) : AbstractServer(host, port) {
-    m_storage = new VertexStorageImpl({0, (size_t) -1});
+NodeServer::NodeServer(const std::string &host, int port, size_t hashMin, size_t hashMax) : AbstractServer(host, port) {
+    m_storage = new VertexStorageImpl({hashMin, hashMax});
 
     m_operations.insert({"addVertex", addVertex});
     m_operations.insert({"getVertex", getVertex});

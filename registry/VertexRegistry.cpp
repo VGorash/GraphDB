@@ -32,7 +32,8 @@ VertexRegistry::VertexRegistry() {
 //        lowerBound = upperBound + 1;
 //    }
 
-    m_clusters.push_back(new RemoteVertexStorage("127.0.0.1", 26080, 5));
+    m_clusters.push_back(new RemoteVertexStorage("127.0.0.1", 2001, 5));
+    m_clusters.push_back(new RemoteVertexStorage("127.0.0.1", 2002, 5));
 
 }
 

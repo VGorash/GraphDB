@@ -12,7 +12,7 @@
 
 class NodeServer : public AbstractServer {
 public:
-    NodeServer(const std::string &host, int port);
+    NodeServer(const std::string &host, int port, size_t hashMin, size_t hashMax);
 
     ~NodeServer() override;
 

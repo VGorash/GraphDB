@@ -13,6 +13,3 @@ add_subdirectory(registry)
 add_subdirectory(database)
 add_subdirectory(server)
 add_subdirectory(node)
-
-add_executable(test main.cpp)
-target_link_libraries(test utils)
