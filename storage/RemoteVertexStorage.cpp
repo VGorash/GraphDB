@@ -20,24 +20,27 @@ void checkReply(std::vector<std::string> &parsed) {
     }
 }
 
-RemoteVertexStorage::RemoteVertexStorage(const std::string &hostname, int port) {
-    m_socket = createSocket();
+RemoteVertexStorage::RemoteVertexStorage(const std::string &hostname, int port, int num_connections) {
+    m_sockets.reserve(num_connections);
     sockaddr_in servInfo = prepareServerInfo(hostname, port);
-    connect(m_socket, servInfo);
+    for (int i = 0; i < num_connections; i++) {
+        SOCKET socket = createSocket();
+        connect(socket, servInfo);
+        m_sockets.insert(socket);
+    }
 }
 
 RemoteVertexStorage::~RemoteVertexStorage() {
-    shutdown(m_socket, SD_BOTH);
-    closesocket(m_socket);
+    for (auto s: m_sockets) {
+        shutdown(s, SD_BOTH);
+        closesocket(s);
+    }
     WSACleanup();
 }
 
-SOCKET &RemoteVertexStorage::getSocket() {
-    return m_socket;
-}
-
 Vertex RemoteVertexStorage::getVertex(const std::string &id) {
-    SOCKET &s = getSocket();
+    auto lock = ConnectionLock(this);
+    const SOCKET &s = lock.getSocket();
     sendString(s, std::string("getVertex ") + id);
     auto reply = split(receiveString(s), ' ');
     checkReply(reply);
@@ -46,7 +49,8 @@ Vertex RemoteVertexStorage::getVertex(const std::string &id) {
 }
 
 Vertex RemoteVertexStorage::addVertex(const std::string &id) {
-    SOCKET &s = getSocket();
+    auto lock = ConnectionLock(this);
+    const SOCKET &s = lock.getSocket();
     sendString(s, std::string("addVertex ") + id);
     auto reply = split(receiveString(s), ' ');
     checkReply(reply);
@@ -55,7 +59,8 @@ Vertex RemoteVertexStorage::addVertex(const std::string &id) {
 }
 
 void RemoteVertexStorage::deleteVertex(const std::string &id) {
-    SOCKET &s = getSocket();
+    auto lock = ConnectionLock(this);
+    const SOCKET &s = lock.getSocket();
     sendString(s, std::string("deleteVertex ") + id);
     auto reply = split(receiveString(s), ' ');
     checkReply(reply);
@@ -63,7 +68,8 @@ void RemoteVertexStorage::deleteVertex(const std::string &id) {
 
 void RemoteVertexStorage::addConnection(const std::string &id1, const std::string &connName, const std::string &id2,
                                         bool reverse) {
-    SOCKET &s = getSocket();
+    auto lock = ConnectionLock(this);
+    const SOCKET &s = lock.getSocket();
     sendString(s,
                std::string("addConnection ") + id1 + " " + connName + " " + id2 + " " + std::to_string((int) reverse));
     auto reply = split(receiveString(s), ' ');
@@ -72,7 +78,8 @@ void RemoteVertexStorage::addConnection(const std::string &id1, const std::strin
 
 void RemoteVertexStorage::removeConnection(const std::string &id1, const std::string &connName, const std::string &id2,
                                            bool reverse) {
-    SOCKET &s = getSocket();
+    auto lock = ConnectionLock(this);
+    const SOCKET &s = lock.getSocket();
     sendString(s, std::string("removeConnection ") + id1 + " " + connName + " " + id2 + " " +
                   std::to_string((int) reverse));
     auto reply = split(receiveString(s), ' ');
@@ -80,7 +87,8 @@ void RemoteVertexStorage::removeConnection(const std::string &id1, const std::st
 }
 
 std::vector<std::string> RemoteVertexStorage::getAllIds() {
-    SOCKET &s = getSocket();
+    auto lock = ConnectionLock(this);
+    const SOCKET &s = lock.getSocket();
     sendString(s, "getAllIds");
     auto reply = split(receiveString(s), ' ');
     checkReply(reply);
@@ -93,7 +101,8 @@ std::vector<std::string> RemoteVertexStorage::getAllIds() {
 }
 
 std::pair<size_t, size_t> RemoteVertexStorage::getHashRange() {
-    SOCKET &s = getSocket();
+    auto lock = ConnectionLock(this);
+    const SOCKET &s = lock.getSocket();
     sendString(s, "getHashRange");
     auto reply = split(receiveString(s), ' ');
     checkReply(reply);
@@ -101,7 +110,8 @@ std::pair<size_t, size_t> RemoteVertexStorage::getHashRange() {
 }
 
 Vertex RemoteVertexStorage::createBackup(const std::string &id) {
-    SOCKET &s = getSocket();
+    auto lock = ConnectionLock(this);
+    const SOCKET &s = lock.getSocket();
     sendString(s, std::string("createBackup ") + id);
     auto reply = split(receiveString(s), ' ');
     checkReply(reply);
@@ -110,22 +120,53 @@ Vertex RemoteVertexStorage::createBackup(const std::string &id) {
 }
 
 void RemoteVertexStorage::restoreBackup(const Vertex &vertex) {
-    SOCKET &s = getSocket();
+    auto lock = ConnectionLock(this);
+    const SOCKET &s = lock.getSocket();
     sendString(s, std::string("restoreBackup ") + vertex.toString());
     auto reply = split(receiveString(s), ' ');
     checkReply(reply);
 }
 
 void RemoteVertexStorage::lock() {
-    SOCKET &s = getSocket();
+    auto lock = ConnectionLock(this);
+    const SOCKET &s = lock.getSocket();
     sendString(s, std::string("lock"));
     auto reply = split(receiveString(s), ' ');
     checkReply(reply);
 }
 
 void RemoteVertexStorage::unlock() {
-    SOCKET &s = getSocket();
+    auto lock = ConnectionLock(this);
+    const SOCKET &s = lock.getSocket();
     sendString(s, std::string("unlock"));
     auto reply = split(receiveString(s), ' ');
     checkReply(reply);
+}
+
+RemoteVertexStorage::ConnectionLock::ConnectionLock(RemoteVertexStorage *instance) {
+    m_instance = instance;
+    while (true) {
+        if (instance->m_sockets.empty()) {
+            continue;
+        }
+        instance->m_mutex.lock();
+        if (instance->m_sockets.empty()) {
+            instance->m_mutex.unlock();
+            continue;
+        }
+        break;
+    }
+    m_socket = *instance->m_sockets.begin();
+    instance->m_sockets.erase(m_socket);
+    instance->m_mutex.unlock();
+}
+
+RemoteVertexStorage::ConnectionLock::~ConnectionLock() {
+    m_instance->m_mutex.lock();
+    m_instance->m_sockets.insert(m_socket);
+    m_instance->m_mutex.unlock();
+}
+
+const SOCKET &RemoteVertexStorage::ConnectionLock::getSocket() const {
+    return m_socket;
 }

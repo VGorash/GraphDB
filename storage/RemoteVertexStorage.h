@@ -7,10 +7,26 @@
 
 #include "LocalVertexStorage.h"
 #include "../utils/tcp_utils.h"
+#include <mutex>
+#include <unordered_set>
 
 class RemoteVertexStorage : public VertexStorage {
+
+    class ConnectionLock {
+    public:
+        explicit ConnectionLock(RemoteVertexStorage *instance);
+
+        ~ConnectionLock();
+
+        const SOCKET &getSocket() const;
+
+    private:
+        SOCKET m_socket;
+        RemoteVertexStorage *m_instance;
+    };
+
 public:
-    RemoteVertexStorage(const std::string &hostname, int port);
+    RemoteVertexStorage(const std::string &hostname, int port, int num_connections);
 
     ~RemoteVertexStorage() override;
 
@@ -40,10 +56,8 @@ public:
     void unlock() override;
 
 private:
-    SOCKET &getSocket();
-
-private:
-    SOCKET m_socket;
+    std::unordered_set<SOCKET> m_sockets;
+    std::mutex m_mutex;
 };
 
 
