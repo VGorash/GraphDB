@@ -26,7 +26,7 @@ class RemoteVertexStorage : public VertexStorage {
     };
 
 public:
-    RemoteVertexStorage(const std::string &hostname, int port, int num_connections);
+    RemoteVertexStorage(const std::string &hostname, int port, int numConnections);
 
     ~RemoteVertexStorage() override;
 

@@ -86,12 +86,12 @@ void processConnectionException(ConnectionOperationException &e, std::stringstre
     switch (e.code) {
         case ConnectionAlreadyExists:
             out << "Connection ";
-            printConnection(e.vertexId1, e.vertexId1, e.vertexId2, out);
+            printConnection(e.vertexId1, e.connName, e.vertexId2, out);
             out << " already exists in database\n";
             break;
         case ConnectionNotFound:
             out << "Connection ";
-            printConnection(e.vertexId1, e.vertexId1, e.vertexId2, out);
+            printConnection(e.vertexId1, e.connName, e.vertexId2, out);
             out << " not found in database\n";
             break;
     }
@@ -265,6 +265,9 @@ DatabaseServer::DatabaseServer(const std::string &host, int port) : AbstractServ
     m_operations.insert({"connect", connectVertices});
     m_operations.insert({"disconnect", disconnectVertices});
     m_operations.insert({"query", query});
+
+    // force initialization
+    VertexRegistry::getInstance().getAllIds();
 }
 
 std::string DatabaseServer::processString(const std::string &command) {

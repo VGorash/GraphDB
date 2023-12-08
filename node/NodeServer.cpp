@@ -105,7 +105,7 @@ std::string NodeServer::processString(const std::string &command) {
         }
         catch (ConnectionOperationException &e) {
             out << Status::ConnectionError << " " << e.code << " " << e.vertexId1 << " " << e.connName << " "
-                << e.vertexId2 << e.reverse;
+                    << e.vertexId2 << " " << e.reverse;
         }
         return out.str();
     }

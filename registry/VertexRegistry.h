@@ -41,15 +41,13 @@ private:
 
     ~VertexRegistry();
 
-    void loadConfig();
-
     VertexStorage *getClusterForId(const std::string &id);
 
     Vertex getVertexNoLock(const std::string &id);
 
 private:
-    int m_numClusters{};
-    std::vector<VertexStorage *> m_clusters;
+    std::vector<VertexStorage *> m_storages;
+    VertexStorage *m_fallbackStorage;
     std::hash<std::string> m_hasher;
 
     std::unordered_set<std::string> m_lockedVertices;

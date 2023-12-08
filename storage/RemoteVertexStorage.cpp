@@ -20,10 +20,10 @@ void checkReply(std::vector<std::string> &parsed) {
     }
 }
 
-RemoteVertexStorage::RemoteVertexStorage(const std::string &hostname, int port, int num_connections) {
-    m_sockets.reserve(num_connections);
+RemoteVertexStorage::RemoteVertexStorage(const std::string &hostname, int port, int numConnections) {
+    m_sockets.reserve(numConnections);
     sockaddr_in servInfo = prepareServerInfo(hostname, port);
-    for (int i = 0; i < num_connections; i++) {
+    for (int i = 0; i < numConnections; i++) {
         SOCKET socket = createSocket();
         connect(socket, servInfo);
         m_sockets.insert(socket);

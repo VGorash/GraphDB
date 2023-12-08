@@ -80,12 +80,12 @@ void processConnectionException(ConnectionOperationException &e) {
     switch (e.code) {
         case ConnectionAlreadyExists:
             std::cout << "Connection ";
-            printConnection(e.vertexId1, e.vertexId1, e.vertexId2);
+            printConnection(e.vertexId1, e.connName, e.vertexId2);
             std::cout << " already exists in database\n";
             break;
         case ConnectionNotFound:
             std::cout << "Connection ";
-            printConnection(e.vertexId1, e.vertexId1, e.vertexId2);
+            printConnection(e.vertexId1, e.connName, e.vertexId2);
             std::cout << " not found in database\n";
             break;
     }
@@ -249,6 +249,11 @@ int main() {
     bool exitFlag = false;
     std::string input;
     std::string command;
+
+    std::hash<std::string> h;
+
+    // force initialization
+    VertexRegistry::getInstance().getAllIds();
 
     while (!exitFlag) {
         std::cout << ">";
