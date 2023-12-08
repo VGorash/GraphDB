@@ -256,7 +256,13 @@ int main() {
     std::hash<std::string> h;
 
     // force initialization
-    VertexRegistry::getInstance().getAllIds();
+    try {
+        VertexRegistry::getInstance().getAllIds();
+    }
+    catch (std::exception &e) {
+        std::cout << e.what() << std::endl;
+        exit(-1);
+    }
 
     while (!exitFlag) {
         std::cout << ">";

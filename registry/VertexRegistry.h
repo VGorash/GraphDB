@@ -49,6 +49,8 @@ private:
 
     void processRemoteError(RemoteStorageError &e);
 
+    void transferVertices();
+
 private:
     std::vector<VertexStorage *> m_storages;
     VertexStorage *m_fallbackStorage;

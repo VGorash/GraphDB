@@ -46,6 +46,7 @@ VertexRegistry::VertexRegistry() {
         }
     }
     m_fallbackStorage = new LocalVertexStorage({0, (size_t) -1});
+    transferVertices();
 }
 
 VertexRegistry::~VertexRegistry() {
@@ -212,5 +213,29 @@ void VertexRegistry::processRemoteError(RemoteStorageError &e) {
     if (it != m_storages.end()) {
         m_storages.erase(it);
         m_invalidStorages.insert(p);
+    }
+}
+
+void VertexRegistry::transferVertices() {
+    auto ids = m_fallbackStorage->getAllIds();
+    std::vector<VertexStorage *> storages;
+    for (auto s: m_storages) {
+        if (s->getAllIds().empty()) {
+            storages.push_back(s);
+        }
+    }
+    for (const auto &id: ids) {
+        auto *s = getClusterForId(id);
+        if (getClusterForId(id) != m_fallbackStorage &&
+            std::find(storages.begin(), storages.end(), s) != storages.end()) {
+            try {
+                Vertex v = m_fallbackStorage->getVertex(id);
+                s->restoreBackup(v);
+                m_fallbackStorage->deleteVertex(id);
+            }
+            catch (std::exception &) {
+                continue;
+            }
+        }
     }
 }

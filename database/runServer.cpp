@@ -21,6 +21,11 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
-    auto server = DatabaseServer(argv[1], port);
-    server.start();
+    try {
+        auto server = DatabaseServer(argv[1], port);
+        server.start();
+    }
+    catch (std::exception &e) {
+        std::cout << e.what() << std::endl;
+    }
 }

@@ -176,11 +176,12 @@ Vertex VertexStorageImpl::createBackup(const std::string &id) {
 
 void VertexStorageImpl::restoreBackup(const Vertex &vertex) {
     auto locker = StorageLocker(this);
-    Vertex *oldVertex = getVertex(vertex.getId());
+    if (m_vertices.find(vertex.getId()) != m_vertices.end()) {
+        delete m_vertices[vertex.getId()];
+        m_vertices.erase(vertex.getId());
+    }
     auto *newVertex = new Vertex(vertex);
-    m_vertices.erase(vertex.getId());
     m_vertices.insert({newVertex->getId(), newVertex});
-    delete oldVertex;
     m_dirty = true;
 }
 
