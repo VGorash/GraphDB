@@ -49,7 +49,9 @@ private:
 
     void processRemoteError(RemoteStorageError &e);
 
-    void transferVertices();
+    void transferVertices(VertexStorage *src, std::vector<VertexStorage *> dsts);
+
+    void checkIntersections();
 
 private:
     std::vector<VertexStorage *> m_storages;

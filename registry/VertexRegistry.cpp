@@ -45,8 +45,18 @@ VertexRegistry::VertexRegistry() {
             throw std::exception("Storage configuration error");
         }
     }
+    checkIntersections();
     m_fallbackStorage = new LocalVertexStorage({0, (size_t) -1});
-    transferVertices();
+    std::vector<VertexStorage *> emptyStorages;
+    for (auto storage: m_storages) {
+        if (storage->getAllIds().empty()) {
+            emptyStorages.push_back(storage);
+        }
+    }
+    transferVertices(m_fallbackStorage, emptyStorages);
+    for (auto storage: m_storages) {
+        transferVertices(storage, emptyStorages);
+    }
 }
 
 VertexRegistry::~VertexRegistry() {
@@ -216,26 +226,44 @@ void VertexRegistry::processRemoteError(RemoteStorageError &e) {
     }
 }
 
-void VertexRegistry::transferVertices() {
-    auto ids = m_fallbackStorage->getAllIds();
-    std::vector<VertexStorage *> storages;
-    for (auto s: m_storages) {
-        if (s->getAllIds().empty()) {
-            storages.push_back(s);
-        }
+void VertexRegistry::transferVertices(VertexStorage *src, std::vector<VertexStorage *> dsts) {
+    std::vector<std::string> ids;
+    try {
+        ids = src->getAllIds();
+    }
+    catch (RemoteStorageError &e) {
+        processRemoteError(e);
+        return;
     }
     for (const auto &id: ids) {
         auto *s = getClusterForId(id);
-        if (getClusterForId(id) != m_fallbackStorage &&
-            std::find(storages.begin(), storages.end(), s) != storages.end()) {
+        if (getClusterForId(id) != src &&
+            std::find(dsts.begin(), dsts.end(), s) != dsts.end()) {
             try {
-                Vertex v = m_fallbackStorage->getVertex(id);
+                Vertex v = src->getVertex(id);
                 s->restoreBackup(v);
-                m_fallbackStorage->deleteVertex(id);
+                src->deleteVertex(id);
             }
-            catch (std::exception &) {
+            catch (RemoteStorageError &e) {
+                processRemoteError(e);
                 continue;
             }
         }
     }
 }
+
+void VertexRegistry::checkIntersections() {
+    for (auto a: m_storages) {
+        for (auto b: m_storages) {
+            if (a == b) {
+                continue;
+            }
+            if (b->getHashRange().first <= a->getHashRange().second &&
+                b->getHashRange().first >= a->getHashRange().first) {
+                throw (std::exception("Storage configuration error: ranges intersection"));
+            }
+        }
+    }
+}
+
+
