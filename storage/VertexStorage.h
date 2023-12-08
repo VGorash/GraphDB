@@ -26,7 +26,7 @@ public:
 
     virtual std::vector<std::string> getAllIds() = 0;
 
-    virtual std::pair<size_t, size_t> getHashRange() = 0;
+    virtual std::pair<size_t, size_t> getHashRange() const = 0;
 
     virtual Vertex createBackup(const std::string &id) = 0;
 

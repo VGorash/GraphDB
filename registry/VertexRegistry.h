@@ -15,6 +15,8 @@ class VertexStorage;
 
 class Vertex;
 
+class RemoteStorageError;
+
 class VertexRegistry {
 
 public:
@@ -45,6 +47,8 @@ private:
 
     Vertex getVertexNoLock(const std::string &id);
 
+    void processRemoteError(RemoteStorageError &e);
+
 private:
     std::vector<VertexStorage *> m_storages;
     VertexStorage *m_fallbackStorage;
@@ -52,6 +56,8 @@ private:
 
     std::unordered_set<std::string> m_lockedVertices;
     std::mutex m_mutex;
+
+    std::unordered_set<VertexStorage *> m_invalidStorages;
 };
 
 

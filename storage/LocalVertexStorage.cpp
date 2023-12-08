@@ -39,7 +39,7 @@ std::vector<std::string> LocalVertexStorage::getAllIds() {
     return m_impl->getAllIds();
 }
 
-std::pair<size_t, size_t> LocalVertexStorage::getHashRange() {
+std::pair<size_t, size_t> LocalVertexStorage::getHashRange() const {
     return m_impl->getHashRange();
 }
 

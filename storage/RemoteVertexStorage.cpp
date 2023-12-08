@@ -31,7 +31,7 @@ RemoteVertexStorage::RemoteVertexStorage(const std::string &hostname, int port, 
         }
     }
     catch (std::exception &e) {
-        throw RemoteStorageError("Cannot connect to server");
+        throw RemoteStorageError("Cannot connect to server", this);
     }
     auto reply = processRequest("getHashRange", "");
     m_hashRange = {std::stoull(reply[1]), std::stoull(reply[2])};
@@ -53,7 +53,7 @@ std::string RemoteVertexStorage::processRequestImpl(ConnectionLock &lock, const 
     }
     catch (std::exception &e) {
         if (retry) {
-            throw RemoteStorageError("Cannot connect to server");
+            throw RemoteStorageError("Cannot connect to server", this);
         }
         try {
             shutdown(lock.getSocket(), SD_BOTH);
@@ -63,7 +63,7 @@ std::string RemoteVertexStorage::processRequestImpl(ConnectionLock &lock, const 
             lock.setSocket(s);
         }
         catch (std::exception &nested) {
-            throw RemoteStorageError("Cannot connect to server");
+            throw RemoteStorageError("Cannot connect to server", this);
         }
         return processRequestImpl(lock, request, true);
     }
@@ -112,7 +112,7 @@ std::vector<std::string> RemoteVertexStorage::getAllIds() {
     return result;
 }
 
-std::pair<size_t, size_t> RemoteVertexStorage::getHashRange() {
+std::pair<size_t, size_t> RemoteVertexStorage::getHashRange() const {
     return m_hashRange;
 }
 

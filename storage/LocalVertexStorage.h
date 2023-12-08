@@ -29,7 +29,7 @@ public:
 
     std::vector<std::string> getAllIds() override;
 
-    std::pair<size_t, size_t> getHashRange() override;
+    std::pair<size_t, size_t> getHashRange() const override;
 
     Vertex createBackup(const std::string &id) override;
 

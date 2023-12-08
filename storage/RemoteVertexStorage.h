@@ -10,11 +10,6 @@
 #include <mutex>
 #include <unordered_set>
 
-class RemoteStorageError : public std::exception {
-public:
-    explicit RemoteStorageError(const char *m) : std::exception(m) {};
-};
-
 class RemoteVertexStorage : public VertexStorage {
 
     class ConnectionLock {
@@ -54,7 +49,7 @@ public:
 
     std::vector<std::string> getAllIds() override;
 
-    std::pair<size_t, size_t> getHashRange() override;
+    std::pair<size_t, size_t> getHashRange() const override;
 
     Vertex createBackup(const std::string &id) override;
 
@@ -74,6 +69,14 @@ private:
     std::unordered_set<SOCKET> m_sockets;
     std::mutex m_mutex;
     std::pair<size_t, size_t> m_hashRange;
+};
+
+class RemoteStorageError : public std::exception {
+public:
+    explicit RemoteStorageError(const char *m, const RemoteVertexStorage *s) : std::exception(m), storage(s) {};
+
+public:
+    const RemoteVertexStorage *storage;
 };
 
 
