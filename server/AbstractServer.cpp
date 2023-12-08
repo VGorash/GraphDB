@@ -63,7 +63,6 @@ void AbstractServer::start() {
                     sendString(conn, result);
                 }
                 catch (std::exception &e) {
-                    std::cout << e.what() << std::endl;
                     shutdown(conn, SD_BOTH);
                     return;
                 }
