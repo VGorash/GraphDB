@@ -11,8 +11,8 @@
 enum VertexErrorCode {
     VertexAlreadyExists,
     VertexNotFound,
-    VertexHasConnections
-
+    VertexHasConnections,
+    UnreachableStorage
 };
 
 enum ConnectionErrorCode {

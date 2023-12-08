@@ -41,7 +41,8 @@ VertexRegistry::VertexRegistry() {
             m_storages.push_back(new RemoteVertexStorage(hostname, port, numConnections));
         }
         catch (RemoteStorageError &e) {
-            std::cout << "Cannot connect to " << hostname << ":" << port << ". Local storage will be used instead\n";
+            std::cout << "Cannot connect to " << hostname << ":" << port << "\n";
+            throw std::exception("Storage configuration error");
         }
     }
     m_fallbackStorage = new LocalVertexStorage({0, (size_t) -1});
@@ -80,7 +81,7 @@ Vertex VertexRegistry::addVertex(const std::string &id) {
     }
     catch (RemoteStorageError &e) {
         processRemoteError(e);
-        throw VertexOperationException(id, VertexNotFound);
+        throw VertexOperationException(id, UnreachableStorage);
     }
 }
 
@@ -96,7 +97,7 @@ void VertexRegistry::deleteVertex(const std::string &id) {
     }
     catch (RemoteStorageError &e) {
         processRemoteError(e);
-        throw VertexOperationException(id, VertexNotFound);
+        throw VertexOperationException(id, UnreachableStorage);
     }
 }
 
@@ -181,7 +182,7 @@ Vertex VertexRegistry::getVertexNoLock(const std::string &id) {
     }
     catch (RemoteStorageError &e) {
         processRemoteError(e);
-        throw VertexOperationException(id, VertexNotFound);
+        throw VertexOperationException(id, UnreachableStorage);
     }
 }
 
@@ -193,6 +194,12 @@ VertexStorage *VertexRegistry::getClusterForId(const std::string &id) {
             return c;
         }
     }
+    for (auto c: m_invalidStorages) {
+        auto range = c->getHashRange();
+        if ((hash >= range.first) && (hash <= range.second)) {
+            throw VertexOperationException(id, UnreachableStorage);
+        }
+    }
     return m_fallbackStorage;
 }
 
@@ -200,7 +207,7 @@ void VertexRegistry::processRemoteError(RemoteStorageError &e) {
     auto *p = (VertexStorage *) e.storage;
     std::cout << "Storage server for hash range " << e.storage->getHashRange().first << " - "
               << e.storage->getHashRange().second
-              << " is unavailable. Local storage will be used for this hash range\n";
+            << " is unavailable.\n";
     auto it = std::find(m_storages.begin(), m_storages.end(), p);
     if (it != m_storages.end()) {
         m_storages.erase(it);

@@ -73,6 +73,9 @@ void processVertexException(VertexOperationException &e) {
         case VertexHasConnections:
             std::cout << "Cannot delete vertex with id " << e.vertexId << " because it has connections\n";
             break;
+        case UnreachableStorage:
+            std::cout << "Id " << e.vertexId << " is in a storage, which can't be queried\n";
+            break;
     }
 }
 
