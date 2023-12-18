@@ -31,13 +31,7 @@ public:
 
     std::pair<size_t, size_t> getHashRange() const override;
 
-    Vertex createBackup(const std::string &id) override;
-
     void restoreBackup(const Vertex &vertex) override;
-
-    void lock() override;
-
-    void unlock() override;
 
 private:
     VertexStorageImpl *m_impl;

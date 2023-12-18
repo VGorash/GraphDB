@@ -28,13 +28,7 @@ public:
 
     virtual std::pair<size_t, size_t> getHashRange() const = 0;
 
-    virtual Vertex createBackup(const std::string &id) = 0;
-
     virtual void restoreBackup(const Vertex &vertex) = 0;
-
-    virtual void lock() = 0;
-
-    virtual void unlock() = 0;
 
     virtual ~VertexStorage() = default;
 };

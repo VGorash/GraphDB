@@ -10,12 +10,6 @@ DoubleVertexLocker::DoubleVertexLocker(const std::string &id1, const std::string
                                                                                           m_lockedVertices(
                                                                                                   lockedVertices) {
     while (true) {
-        if (m_lockedVertices.find(id1) != m_lockedVertices.end()) {
-            continue;
-        }
-        if (m_lockedVertices.find(id2) != m_lockedVertices.end()) {
-            continue;
-        }
         m_mutex.lock();
         if (m_lockedVertices.find(id1) != m_lockedVertices.end()) {
             m_mutex.unlock();

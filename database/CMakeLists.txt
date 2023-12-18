@@ -13,6 +13,11 @@ add_executable(DBClient
         runClient.cpp
 )
 
+add_executable(DBTests
+        runTests.cpp
+)
+
 target_link_libraries(DBStandalone PRIVATE registry utils)
 target_link_libraries(DBServer PRIVATE registry utils server)
 target_link_libraries(DBClient PRIVATE utils)
+target_link_libraries(DBTests PRIVATE utils)

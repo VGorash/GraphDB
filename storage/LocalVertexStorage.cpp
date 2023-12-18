@@ -43,20 +43,6 @@ std::pair<size_t, size_t> LocalVertexStorage::getHashRange() const {
     return m_impl->getHashRange();
 }
 
-Vertex LocalVertexStorage::createBackup(const std::string &id) {
-    return getVertex(id);
-}
-
 void LocalVertexStorage::restoreBackup(const Vertex &vertex) {
     m_impl->restoreBackup(vertex);
 }
-
-void LocalVertexStorage::lock() {
-    m_impl->lock();
-}
-
-void LocalVertexStorage::unlock() {
-    m_impl->unlock();
-}
-
-

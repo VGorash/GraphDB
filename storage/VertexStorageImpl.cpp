@@ -4,7 +4,7 @@
 
 #include "../vertex/VertexExceptions.h"
 #include "../vertex/Vertex.h"
-#include "../registry/lock/StorageLocker.h"
+#include "StorageLocker.h"
 #include "VertexStorageImpl.h"
 
 #include <string>
@@ -20,7 +20,6 @@ VertexStorageImpl::VertexStorageImpl(std::pair<size_t, size_t> hashRange) : m_ha
 
     m_terminating = false;
     m_dirty = false;
-    m_usages = 0;
 
     // TODO notify
     m_timer = std::thread([&]() {
@@ -42,6 +41,7 @@ VertexStorageImpl::~VertexStorageImpl() {
 }
 
 Vertex *VertexStorageImpl::getVertex(const std::string &id) {
+    auto locker = StorageLocker(this);
     auto it = m_vertices.find(id);
     if (it == m_vertices.end()) {
         throw VertexOperationException(id, VertexErrorCode::VertexNotFound);
@@ -54,9 +54,6 @@ Vertex *VertexStorageImpl::addVertex(const std::string &id) {
     auto it = m_vertices.find(id);
     if (it != m_vertices.end()) {
         throw VertexOperationException(id, VertexErrorCode::VertexAlreadyExists);
-    }
-    if (m_hasher(id) < m_hashRange.first || m_hasher(id) > m_hashRange.second) {
-        throw std::exception("Id is not in hash range");
     }
     auto *vertex = new Vertex(id);
     m_vertices.insert({id, vertex});
@@ -79,18 +76,27 @@ void VertexStorageImpl::deleteVertex(const std::string &id) {
 void VertexStorageImpl::addConnection(const std::string &id1, const std::string &connName, const std::string &id2,
                                       bool reverse) {
     auto locker = StorageLocker(this);
-    getVertex(id1)->connect(connName, id2, reverse);
+    auto it = m_vertices.find(id1);
+    if (it == m_vertices.end()) {
+        throw VertexOperationException(id1, VertexErrorCode::VertexNotFound);
+    }
+    m_vertices[id1]->connect(connName, id2, reverse);
     m_dirty = true;
 }
 
 void VertexStorageImpl::removeConnection(const std::string &id1, const std::string &connName, const std::string &id2,
                                          bool reverse) {
     auto locker = StorageLocker(this);
-    getVertex(id1)->disconnect(connName, id2, reverse);
+    auto it = m_vertices.find(id1);
+    if (it == m_vertices.end()) {
+        throw VertexOperationException(id1, VertexErrorCode::VertexNotFound);
+    }
+    m_vertices[id1]->disconnect(connName, id2, reverse);
     m_dirty = true;
 }
 
 std::vector<std::string> VertexStorageImpl::getAllIds() {
+    auto locker = StorageLocker(this);
     std::vector<std::string> result;
     result.reserve(m_vertices.size());
     for (const auto &n: m_vertices) {
@@ -107,43 +113,25 @@ void VertexStorageImpl::dump() {
     if (!m_dirty) {
         return;
     }
-    while (true) {
-        if (m_usages > 0) {
-            continue;
-        }
-        m_mutex.lock();
-        if (m_usages > 0) {
-            m_mutex.unlock();
-            continue;
-        }
-        break;
+    auto locker = StorageLocker(this);
+    fs::path data_dir("data");
+    if (!fs::exists(data_dir)) {
+        fs::create_directories(data_dir);
     }
-    try {
-        fs::path data_dir("data");
-        if (!fs::exists(data_dir)) {
-            fs::create_directories(data_dir);
-        }
-        fs::path filepath =
-                data_dir / (std::to_string(m_hashRange.first) + "-" + std::to_string(m_hashRange.second) + ".txt");
-        std::ofstream outFile(filepath);
-        if (!outFile.is_open()) {
-            throw std::exception(("Failed to open data file: " + filepath.string()).c_str());
-        }
-        outFile << m_vertices.size() << "\n";
-        for (const auto &n: m_vertices) {
-            outFile << n.second->toString() << "\n";
-        }
-        if (outFile.fail()) {
-            throw std::exception(("Failed to write data file: " + filepath.string()).c_str());
-        }
-        m_dirty = false;
-        m_mutex.unlock();
+    fs::path filepath =
+            data_dir / (std::to_string(m_hashRange.first) + "-" + std::to_string(m_hashRange.second) + ".txt");
+    std::ofstream outFile(filepath);
+    if (!outFile.is_open()) {
+        throw std::exception(("Failed to open data file: " + filepath.string()).c_str());
     }
-    catch (std::exception &) {
-        m_mutex.unlock();
-        throw;
+    outFile << m_vertices.size() << "\n";
+    for (const auto &n: m_vertices) {
+        outFile << n.second->toString() << "\n";
     }
-
+    if (outFile.fail()) {
+        throw std::exception(("Failed to write data file: " + filepath.string()).c_str());
+    }
+    m_dirty = false;
 }
 
 void VertexStorageImpl::load() {
@@ -170,10 +158,6 @@ void VertexStorageImpl::load() {
     }
 }
 
-Vertex VertexStorageImpl::createBackup(const std::string &id) {
-    return {Vertex(*getVertex(id))};
-}
-
 void VertexStorageImpl::restoreBackup(const Vertex &vertex) {
     auto locker = StorageLocker(this);
     if (m_vertices.find(vertex.getId()) != m_vertices.end()) {
@@ -187,12 +171,8 @@ void VertexStorageImpl::restoreBackup(const Vertex &vertex) {
 
 void VertexStorageImpl::lock() {
     m_mutex.lock();
-    m_usages++;
-    m_mutex.unlock();
 }
 
 void VertexStorageImpl::unlock() {
-    m_mutex.lock();
-    m_usages = m_usages < 1 ? 0 : m_usages - 1;
     m_mutex.unlock();
 }

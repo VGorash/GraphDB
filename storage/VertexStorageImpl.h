@@ -40,8 +40,6 @@ public:
 
     std::pair<size_t, size_t> getHashRange();
 
-    Vertex createBackup(const std::string &id);
-
     void restoreBackup(const Vertex &vertex);
 
     void lock();
@@ -62,7 +60,6 @@ private:
 
     std::thread m_timer;
     std::mutex m_mutex;
-    volatile int m_usages;
     volatile bool m_terminating;
     volatile bool m_dirty;
 };

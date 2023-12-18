@@ -8,9 +8,6 @@ VertexLocker::VertexLocker(const std::string &id, std::mutex &mutex,
                            std::unordered_set<std::string> &lockedVertices) : m_id(id), m_mutex(mutex),
                                                                               m_lockedVertices(lockedVertices) {
     while (true) {
-        if (m_lockedVertices.find(id) != m_lockedVertices.end()) {
-            continue;
-        }
         m_mutex.lock();
         if (m_lockedVertices.find(id) != m_lockedVertices.end()) {
             m_mutex.unlock();

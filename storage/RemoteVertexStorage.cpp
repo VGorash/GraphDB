@@ -116,22 +116,8 @@ std::pair<size_t, size_t> RemoteVertexStorage::getHashRange() const {
     return m_hashRange;
 }
 
-Vertex RemoteVertexStorage::createBackup(const std::string &id) {
-    auto reply = processRequest("createBackup", id);
-    auto result = Vertex::fromString(reply[1]);
-    return result;
-}
-
 void RemoteVertexStorage::restoreBackup(const Vertex &vertex) {
     processRequest("restoreBackup", vertex.toString());
-}
-
-void RemoteVertexStorage::lock() {
-    processRequest("lock", "");
-}
-
-void RemoteVertexStorage::unlock() {
-    processRequest("unlock", "");
 }
 
 RemoteVertexStorage::ConnectionLock::ConnectionLock(RemoteVertexStorage *instance) {

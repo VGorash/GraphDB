@@ -48,24 +48,10 @@ void getHashRange(const std::vector<std::string> &s, VertexStorageImpl *storage,
     out << Status::Success << " " << range.first << " " << range.second;
 }
 
-void createBackup(const std::vector<std::string> &s, VertexStorageImpl *storage, std::stringstream &out) {
-    Vertex vertex = storage->createBackup(s[1]);
-    out << Status::Success << " " << vertex.toString();
-}
 
 void restoreBackup(const std::vector<std::string> &s, VertexStorageImpl *storage, std::stringstream &out) {
     Vertex vertex = Vertex::fromString(s[1]);
     storage->restoreBackup(vertex);
-    out << Status::Success;
-}
-
-void lock(const std::vector<std::string> &s, VertexStorageImpl *storage, std::stringstream &out) {
-    storage->lock();
-    out << Status::Success;
-}
-
-void unlock(const std::vector<std::string> &s, VertexStorageImpl *storage, std::stringstream &out) {
-    storage->unlock();
     out << Status::Success;
 }
 
@@ -83,10 +69,7 @@ NodeServer::NodeServer(const std::string &host, int port, size_t hashMin, size_t
     m_operations.insert({"removeConnection", removeConnection});
     m_operations.insert({"getAllIds", getAllIds});
     m_operations.insert({"getHashRange", getHashRange});
-    m_operations.insert({"createBackup", createBackup});
     m_operations.insert({"restoreBackup", restoreBackup});
-    m_operations.insert({"lock", lock});
-    m_operations.insert({"unlock", unlock});
 }
 
 NodeServer::~NodeServer() {

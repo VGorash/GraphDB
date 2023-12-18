@@ -4,5 +4,6 @@ add_library(storage STATIC
         VertexStorageImpl.cpp
         LocalVertexStorage.cpp
         RemoteVertexStorage.cpp
+        StorageLocker.cpp
 )
 target_link_libraries(storage PRIVATE vertex utils)

@@ -8,7 +8,6 @@
 #include "../storage/RemoteVertexStorage.h"
 #include "lock/VertexLocker.h"
 #include "lock/DoubleVertexLocker.h"
-#include "lock/StorageLocker.h"
 #include "VertexRegistry.h"
 
 #include <fstream>
@@ -120,11 +119,9 @@ VertexRegistry::connectVertices(const std::string &id1, const std::string &connN
     auto cluster2 = getClusterForId(id2);
 
     try {
-        auto dumpLocker1 = StorageLocker(cluster1);
-        auto dumpLocker2 = StorageLocker(cluster2);
 
-        const Vertex vertex1 = cluster1->createBackup(id1);
-        const Vertex vertex2 = cluster2->createBackup(id2);
+        const Vertex vertex1 = cluster1->getVertex(id1);
+        const Vertex vertex2 = cluster2->getVertex(id2);
 
         try {
             cluster1->addConnection(id1, connName, id2, false);
@@ -150,11 +147,8 @@ VertexRegistry::disconnectVertices(const std::string &id1, const std::string &co
     auto cluster2 = getClusterForId(id2);
 
     try {
-        auto dumpLocker1 = StorageLocker(cluster1);
-        auto dumpLocker2 = StorageLocker(cluster2);
-
-        const Vertex vertex1 = cluster1->createBackup(id1);
-        const Vertex vertex2 = cluster2->createBackup(id2);
+        const Vertex vertex1 = cluster1->getVertex(id1);
+        const Vertex vertex2 = cluster2->getVertex(id2);
 
         try {
             cluster1->removeConnection(id1, connName, id2, false);
